@@ -1,0 +1,13 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.ProyectoBussinesOne" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Color de la barra de acción / ToolBar -->
+        <item name="colorPrimary">@color/colorPrimaryDark</item>
+        <!-- Color de la barra de estado -->
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
+        <!-- Para Android 5.0+ también hereda de colorPrimaryDark -->
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    </style>
+
+    <style name="Theme.ProyectoBussinesOne" parent="Base.Theme.ProyectoBussinesOne" />
+</resources>
