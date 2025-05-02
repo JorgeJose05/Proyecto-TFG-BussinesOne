@@ -5,6 +5,7 @@ package com.example.proyectobussinesone
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -28,7 +29,7 @@ import com.example.proyectobussinesone.ui.screens.PantallaRegistro
 import com.example.proyectobussinesone.ui.screens.PreviewPantallaCorreoDeRecuperacion
 import com.example.proyectobussinesone.ui.theme.ProyectoBussinesOneTheme
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

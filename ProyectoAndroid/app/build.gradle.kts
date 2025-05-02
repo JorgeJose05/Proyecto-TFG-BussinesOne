@@ -45,13 +45,17 @@ android {
 }
 
 dependencies {
+    implementation ("androidx.navigation:navigation-fragment:2.8.9")
+    implementation ("androidx.navigation:navigation-ui:2.8.9")
+    implementation ("androidx.navigation:navigation-compose:2.8.9")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
     implementation("androidx.compose.material:material-icons-extended:1.5.1")
     implementation ("androidx.compose.material3:material3:1.3.2")
-    implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.activity:activity-compose:1.7.2")
     implementation ("androidx.compose.ui:ui:1.5.1")
+    implementation ("androidx.fragment:fragment-compose:1.8.0")
     implementation(libs.androidx.material3.android)
+    implementation(libs.androidx.ui.viewbinding)
     debugImplementation("androidx.compose.ui:ui-tooling:1.5.1")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.5.1")
     implementation ("androidx.compose.material:material:1.5.1")

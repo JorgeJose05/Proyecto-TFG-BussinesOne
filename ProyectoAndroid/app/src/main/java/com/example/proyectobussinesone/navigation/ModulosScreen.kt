@@ -1,5 +1,6 @@
 package com.example.proyectobussinesone.navigation
 
+import android.view.View
 import com.example.proyectobussinesone.ModuloStoreItem
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,7 +31,20 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.*
 import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.viewinterop.AndroidViewBinding
+import androidx.navigation.findNavController
+import com.example.proyectobussinesone.R
+import com.example.proyectobussinesone.ComponentePrueba
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.commit
+import androidx.fragment.compose.AndroidFragment
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,7 +108,7 @@ fun ModulosScreen() {
                         IconButton(
                             onClick = { scope.launch { drawerState.open() } }
                         ) {
-                            Icon(Icons.Default.Apps, contentDescription = "Abrir menú")
+                            Icon(Icons.Default.Menu, contentDescription = "Abrir menú", modifier = Modifier.size(40.dp))
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -274,14 +288,12 @@ fun Modulo1Screen() {
 
 @Composable
 fun Modulo2Screen() {
-    Box(
+    AndroidFragment(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFFFD6A5)),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("👤 Perfil", color = Color.Black)
-    }
+        clazz = com.example.proyectobussinesone.ComponentePrueba::class.java
+    )
 }
 
 @Composable
