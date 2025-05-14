@@ -45,6 +45,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation ("androidx.navigation:navigation-fragment:2.8.9")
     implementation ("androidx.navigation:navigation-ui:2.8.9")
     implementation ("androidx.navigation:navigation-compose:2.8.9")

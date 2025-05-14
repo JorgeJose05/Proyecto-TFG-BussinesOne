@@ -335,8 +335,7 @@ fun Modulo3Screen() {
         }
     }
 
-    val viewModel = remember { TimeTrackerViewModel() }
-    CalendarioConFichaje(viewModel)
+    CalendarioConFichaje()
 }
 
 @Preview(showBackground = true)
