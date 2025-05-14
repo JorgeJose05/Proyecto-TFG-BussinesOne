@@ -45,6 +45,11 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.fragment.compose.AndroidFragment
+import com.example.proyectobussinesone.ComponenteKotlinPrueba.CalendarioConFichaje
+import com.example.proyectobussinesone.ComponenteKotlinPrueba.CustomCalendar
+import com.example.proyectobussinesone.ComponenteKotlinPrueba.TimeTrackerViewModel
+import java.time.LocalDate
+import java.time.YearMonth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -298,14 +303,40 @@ fun Modulo2Screen() {
 
 @Composable
 fun Modulo3Screen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFFF9AA2)),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("⚙️ Configuración", color = Color.Black)
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+
+    var currentMonth by remember { mutableStateOf(YearMonth.now()) }
+
+    // Estado para las horas trabajadas y el máximo de horas
+    var hoursWorked by remember { mutableStateOf(15f) }
+    val maxHours = 40f
+
+    // Estado de si está fichado o no
+    var isClockedIn by remember { mutableStateOf(false) }
+
+    val onDateSelected: (LocalDate) -> Unit = { date ->
+        selectedDate = date
     }
+
+    // Lógica para mover el mes hacia adelante y hacia atrás
+    val onNextMonth: () -> Unit = {
+        currentMonth = currentMonth.plusMonths(1)
+    }
+
+    val onPreviousMonth: () -> Unit = {
+        currentMonth = currentMonth.minusMonths(1)
+    }
+
+    // Lógica para fichar/desfichar
+    val onToggleClock: () -> Unit = {
+        isClockedIn = !isClockedIn
+        if (isClockedIn) {
+            hoursWorked += 1f  // Si ficha, agrega una hora (puedes personalizar esta lógica)
+        }
+    }
+
+    val viewModel = remember { TimeTrackerViewModel() }
+    CalendarioConFichaje(viewModel)
 }
 
 @Preview(showBackground = true)

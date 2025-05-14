@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.proyectobussinesone"
-        minSdk = 21
+        minSdk = 27
         targetSdk = 34
         kotlinOptions {
             jvmTarget = "1.8"
