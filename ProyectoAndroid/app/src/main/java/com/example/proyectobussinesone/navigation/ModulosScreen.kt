@@ -1,6 +1,5 @@
 package com.example.proyectobussinesone.navigation
 
-import android.view.View
 import com.example.proyectobussinesone.ModuloStoreItem
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,23 +30,15 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.*
 import androidx.compose.material.icons.filled.*
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.viewinterop.AndroidViewBinding
-import androidx.navigation.findNavController
-import com.example.proyectobussinesone.R
-import com.example.proyectobussinesone.ComponentePrueba
+//import com.example.proyectobussinesone.ComponenteProductos.ComponentePrueba
 import androidx.compose.runtime.*
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.commit
 import androidx.fragment.compose.AndroidFragment
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.proyectobussinesone.ComponenteKotlinPrueba.CalendarioConFichaje
-import com.example.proyectobussinesone.ComponenteKotlinPrueba.CustomCalendar
-import com.example.proyectobussinesone.ComponenteKotlinPrueba.TimeTrackerViewModel
+import com.example.proyectobussinesone.ComponenteKotlinPrueba.DetalleDiaScreen
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -138,7 +129,20 @@ fun ModulosScreen() {
                     Modulo2Screen()
                 }
                 composable("modulo3") {
-                    Modulo3Screen()
+                    Modulo3Screen(navController)
+                }
+                composable(
+                    "detalle/{fecha}",
+                    arguments = listOf(navArgument("fecha") {
+                        type = NavType.StringType
+                    })
+                ) { backStack ->
+                    val fechaStr = backStack.arguments?.getString("fecha")!!
+                    val fecha = LocalDate.parse(fechaStr)
+                    DetalleDiaScreen(
+                        fecha = fecha,
+                        onBack = { navController.popBackStack() }
+                    )
                 }
             }
         }
@@ -293,16 +297,16 @@ fun Modulo1Screen() {
 
 @Composable
 fun Modulo2Screen() {
-    AndroidFragment(
+    /*AndroidFragment(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFFFD6A5)),
-        clazz = com.example.proyectobussinesone.ComponentePrueba::class.java
-    )
+        clazz = ComponentePrueba::class.java
+    )*/
 }
 
 @Composable
-fun Modulo3Screen() {
+fun Modulo3Screen(navController: NavHostController) {
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
 
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
@@ -335,7 +339,9 @@ fun Modulo3Screen() {
         }
     }
 
-    CalendarioConFichaje()
+    CalendarioConFichaje( onDateClick = { date ->
+        navController.navigate("detalle/${date}")
+    },)
 }
 
 @Preview(showBackground = true)

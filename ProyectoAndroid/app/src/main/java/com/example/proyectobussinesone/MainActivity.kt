@@ -61,6 +61,7 @@ class MainActivity : AppCompatActivity() {
                         composable("pantalla_recuperacion_de_correo") {
                             PantallaCorreoDeRecuperacion(navController)
                         }
+
                     }
                 }
             }

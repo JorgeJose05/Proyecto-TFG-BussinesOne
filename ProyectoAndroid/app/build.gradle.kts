@@ -21,6 +21,7 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"  // o la más reciente
@@ -45,6 +46,7 @@ android {
 }
 
 dependencies {
+    implementation ("com.google.mlkit:barcode-scanning:17.2.0")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation ("androidx.navigation:navigation-fragment:2.8.9")
     implementation ("androidx.navigation:navigation-ui:2.8.9")
@@ -57,6 +59,9 @@ dependencies {
     implementation ("androidx.fragment:fragment-compose:1.8.0")
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.ui.viewbinding)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.play.services.mlkit.barcode.scanning)
+    implementation(libs.androidx.camera.lifecycle)
     debugImplementation("androidx.compose.ui:ui-tooling:1.5.1")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.5.1")
     implementation ("androidx.compose.material:material:1.5.1")

@@ -38,13 +38,19 @@ import java.util.*
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
 import com.example.proyectobussinesone.ui.theme.ProyectoBussinesOneTheme
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 
 
 private val Context.dataStore by preferencesDataStore("time_prefs")
+
+data class TimeEntry(val date: LocalDate, val inTime: LocalTime, val outTime: LocalTime?,val isRealTime: Boolean)
+
 
 class TimeTrackerViewModel(private val context: Context) : ViewModel() {
 
@@ -91,10 +97,35 @@ class TimeTrackerViewModel(private val context: Context) : ViewModel() {
             }
         }
     }
+
+    private val _entries = MutableStateFlow<List<TimeEntry>>(emptyList())
+    val entries: StateFlow<List<TimeEntry>> = _entries
+
+    fun addTimeEntry(entry: TimeEntry) {
+        _entries.value = _entries.value + entry
+    }
+
+    fun loadMonthEntries(month: YearMonth) {
+        viewModelScope.launch {
+            // TODO: reemplazar por llamada real a BD
+            val fake = listOf(
+                TimeEntry(month.atDay(2), LocalTime.of(9,0), LocalTime.of(17,0),true),
+                TimeEntry(month.atDay(5), LocalTime.of(8,30), LocalTime.of(15,45),true),
+                TimeEntry(month.atDay(6), LocalTime.of(2,30), LocalTime.of(22,45),true),
+                TimeEntry(month.atDay(5), LocalTime.of(16,0), null,true), // aún trabajando
+                TimeEntry(month.atDay(12), LocalTime.of(10,0), LocalTime.of(14,0),true)
+            )
+            _entries.value = fake
+        }
+    }
+
+    // Filtra entradas de un día concreto
+    fun entriesForDay(day: LocalDate): List<TimeEntry> =
+        entries.value.filter { it.date == day }
 }
 
 @Composable
-fun CalendarioConFichaje() {
+fun CalendarioConFichaje( onDateClick: (LocalDate) -> Unit) {
     val context = LocalContext.current
     val vm: TimeTrackerViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
@@ -112,6 +143,7 @@ fun CalendarioConFichaje() {
         currentMonth    = currentMonth,
         selectedDate    = selectedDate,
         onDateSelected  = { selectedDate = it },
+        onDateClick     = onDateClick,
         onPreviousMonth = { currentMonth = currentMonth.minusMonths(1) },
         onNextMonth     = { currentMonth = currentMonth.plusMonths(1) },
         secondsWorked   = vm.secondsWorked.value,
@@ -125,13 +157,22 @@ fun CustomCalendar(
     currentMonth: YearMonth,
     selectedDate: LocalDate?,
     onDateSelected: (LocalDate) -> Unit,
+    onDateClick: (LocalDate) -> Unit,      // ← nuevo
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
     secondsWorked: Long,
     maxHours: Float
 ) {
-    val days = remember(currentMonth) { generateMonthDays(currentMonth) }
+    LaunchedEffect(currentMonth) {
+        viewModel.loadMonthEntries(currentMonth)
+    }
 
+    val days = remember(currentMonth, viewModel.entries) { generateMonthDays(currentMonth) }
+    val entriesList by viewModel.entries.collectAsStateWithLifecycle(initialValue = emptyList())
+
+    val entriesByDate = remember(entriesList) {
+        entriesList.groupBy { it.date }
+    }
     Column {
         // Navegación de mes
         Row(
@@ -155,7 +196,16 @@ fun CustomCalendar(
         WeekDaysHeader()
         LazyVerticalGrid(columns = GridCells.Fixed(7), modifier = Modifier.fillMaxWidth()) {
             items(days) { date ->
-                DayCell(date, date == selectedDate) { onDateSelected(date) }
+                val hasEntries = entriesByDate.containsKey(date)
+                DayCell(
+                    date       = date,
+                    isSelected = date == selectedDate,
+                    hasEntries = hasEntries,
+                    onClick    = {
+                        onDateSelected(it)
+                        onDateClick(it)
+                    }
+                )
             }
         }
 
@@ -166,39 +216,50 @@ fun CustomCalendar(
 @Composable
 fun ProgressBar(secondsWorked: Long, maxHours: Float) {
     val totalMin = secondsWorked / 60
-    val maxMin   = (maxHours * 60).toLong()
+    val maxMin = (maxHours * 60).toLong()
     val progress = (totalMin.toFloat() / maxMin).coerceIn(0f, 1f)
-    val h        = totalMin / 60
-    val m        = totalMin % 60
+    val h = totalMin / 60
+    val m = totalMin % 60
 
-    Box(Modifier.fillMaxWidth().padding(16.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = "Horas trabajadas esta semana",
+            style = MaterialTheme.typography.body2,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.padding(bottom = 4.dp)
+        )
         Box(
-            Modifier
+            modifier = Modifier
                 .fillMaxWidth()
-                .height(36.dp)
-                .background(Color(0xFFE0E0E0), RoundedCornerShape(50))
-                .padding(4.dp)
+                .height(28.dp)
+                .clip(RoundedCornerShape(50))
+                .background(Color(0xFFE0E0E0))
         ) {
             Box(
-                Modifier
+                modifier = Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(progress)
                     .background(
                         Brush.horizontalGradient(
-                            listOf(Color(0xFF2196F3), Color(0xFF0D47A1))
-                        ),
-                        RoundedCornerShape(50)
+                            listOf(Color(0xFF64B5F6), Color(0xFF1976D2))
+                        )
                     )
             )
             Text(
-                "$h h $m m / ${maxHours.toInt()}h",
-                Modifier.align(Alignment.Center),
+                text = String.format("%02dh %02dm / %dh", h, m, maxHours.toInt()),
+                modifier = Modifier.align(Alignment.Center),
                 color = Color.White,
+                style = MaterialTheme.typography.subtitle1,
                 fontWeight = FontWeight.Bold
             )
         }
     }
 }
+
 
 // --------------------------------------
 // CLOCK IN/OUT BUTTON
@@ -235,22 +296,34 @@ fun ClockInOutButton(
 }
 
 @Composable
-fun DayCell(date: LocalDate, isSelected: Boolean, onClick: () -> Unit) {
+fun DayCell(
+    date: LocalDate,
+    isSelected: Boolean,
+    hasEntries: Boolean,             // ← nuevo parámetro
+    onClick: (LocalDate) -> Unit
+) {
     val background = when {
-        isSelected -> Color.Blue
-        date == LocalDate.now() -> Color.LightGray
-        else -> Color.Transparent
+        isSelected            -> Color(0xFF81B5E0) // azul más intenso al seleccionar
+        hasEntries            -> Color(0xFFCCD9E3) // azul claro si tiene fichajes
+        date == LocalDate.now() -> Color(0xFFE0E0E0)
+        else                  -> Color.Transparent
     }
     Box(
         modifier = Modifier
             .aspectRatio(1f)
-            .background(background)
-            .clickable { onClick() },  // <-- Lambda aquí
-        contentAlignment = Alignment.Center
+            .background(background, shape = RoundedCornerShape(4.dp))
+            .clickable { onClick(date) }
+            .padding(4.dp),
+        contentAlignment = Alignment.TopCenter
     ) {
-        Text(date.dayOfMonth.toString())
+        Text(
+            text = date.dayOfMonth.toString(),
+            style = MaterialTheme.typography.body2,
+            textAlign = TextAlign.Center
+        )
     }
 }
+
 
 @Composable
 fun WeekDaysHeader() {
@@ -274,6 +347,8 @@ fun PreviewCalendarioConFichaje() {
     ProyectoBussinesOneTheme {
         // Creamos un NavController de prueba para el Preview
         val navController = rememberNavController()
-        CalendarioConFichaje()
+        CalendarioConFichaje( onDateClick = { date ->
+            navController.navigate("detalle/${date}")
+        })
     }
 }
