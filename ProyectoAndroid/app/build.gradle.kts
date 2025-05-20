@@ -46,6 +46,9 @@ android {
 }
 
 dependencies {
+    //Gson
+    implementation ("com.google.code.gson:gson:2.8.9")
+
     //zxingx crear codigos de barras
     implementation ("com.google.zxing:core:3.4.0")
 
@@ -54,7 +57,7 @@ dependencies {
 
     //camara
     implementation ("androidx.camera:camera-core:1.3.4")
-    implementation ("androidx.camera:camera-camera2:1.3.4")       // ❗️ necesaria
+    implementation ("androidx.camera:camera-camera2:1.3.4")
     implementation ("androidx.camera:camera-lifecycle:1.3.4")
     implementation ("androidx.camera:camera-view:1.3.4")
     //
@@ -75,6 +78,7 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.play.services.mlkit.barcode.scanning)
     implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.firebase.crashlytics.buildtools)
     debugImplementation("androidx.compose.ui:ui-tooling:1.5.1")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.5.1")
     implementation ("androidx.compose.material:material:1.5.1")

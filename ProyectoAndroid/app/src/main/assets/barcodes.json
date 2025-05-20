@@ -1,0 +1,4 @@
+[
+  { "code": "123456789012", "name": "Producto A", "price": 3.50 },
+  { "code": "987654321098", "name": "Producto B", "price": 5.00 }
+]
