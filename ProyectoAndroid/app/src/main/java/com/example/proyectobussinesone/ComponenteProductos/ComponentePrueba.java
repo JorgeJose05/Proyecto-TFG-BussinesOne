@@ -3,6 +3,8 @@ package com.example.proyectobussinesone.ComponenteProductos;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
+import androidx.annotation.OptIn;
+import androidx.camera.core.ExperimentalGetImage;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -23,10 +25,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-/*
+
 import com.example.proyectobussinesone.R;
 import com.example.proyectobussinesone.databinding.FragmentComponentePruebaBinding;
-import com.google.mlkit.vision.barcode.Barcode;
+import com.google.mlkit.vision.barcode.common.Barcode;
+
 import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.common.InputImage;
@@ -42,7 +45,11 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-
+/**
+ * A simple {@link Fragment} subclass.
+ * Use the {@link ComponentePrueba#newInstance} factory method to
+ * create an instance of this fragment.
+ */
 public class ComponentePrueba extends Fragment {
 
 
@@ -116,6 +123,7 @@ public class ComponentePrueba extends Fragment {
         }, ContextCompat.getMainExecutor(requireContext()));
     }
 
+    @OptIn(markerClass = ExperimentalGetImage.class)
     private void processImageProxy(ImageProxy imageProxy) {
         if (imageProxy.getImage() == null) {
             imageProxy.close();
@@ -159,4 +167,3 @@ public class ComponentePrueba extends Fragment {
         binding = null;
     }
 }
-*/

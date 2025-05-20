@@ -31,7 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.text.font.FontWeight
-//import com.example.proyectobussinesone.ComponenteProductos.ComponentePrueba
+import com.example.proyectobussinesone.ComponenteProductos.ComponentePrueba
 import androidx.compose.runtime.*
 import androidx.fragment.compose.AndroidFragment
 import androidx.navigation.NavHostController
@@ -297,12 +297,12 @@ fun Modulo1Screen() {
 
 @Composable
 fun Modulo2Screen() {
-    /*AndroidFragment(
+    AndroidFragment(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFFFD6A5)),
         clazz = ComponentePrueba::class.java
-    )*/
+    )
 }
 
 @Composable

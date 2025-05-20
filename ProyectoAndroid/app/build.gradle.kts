@@ -46,6 +46,19 @@ android {
 }
 
 dependencies {
+    //zxingx crear codigos de barras
+    implementation ("com.google.zxing:core:3.4.0")
+
+    //camara 2
+    implementation ("androidx.camera:camera-camera2:1.3.4")
+
+    //camara
+    implementation ("androidx.camera:camera-core:1.3.4")
+    implementation ("androidx.camera:camera-camera2:1.3.4")       // ❗️ necesaria
+    implementation ("androidx.camera:camera-lifecycle:1.3.4")
+    implementation ("androidx.camera:camera-view:1.3.4")
+    //
+
     implementation ("com.google.mlkit:barcode-scanning:17.2.0")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation ("androidx.navigation:navigation-fragment:2.8.9")
