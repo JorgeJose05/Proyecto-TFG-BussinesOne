@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragmentContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ComponenteProductos.Menu">
+
+    <!--
+        La cosa es
+        el usairo de normal crea el codigo haciendo una foto y de la foto genera un codigo int que se traduce en un  codigo de barras
+        ese codigo se puede imprimir y escanear, tu puedes empezar a hacer una compra, scannear varios codigos y cuando lo tengas todo
+        te muestra una lista de productos con su precio, nombre, imagen, codigo int de codigo de barras y cantidad en stock y el usuario que lo ha creado
+        y
+        ¿gestion de inventaio? si da tiempo gestionar los productos añadidos y el stock que hay
+     -->
+
+
+
+    <!-- Panel de botones inicial -->
+    <LinearLayout
+        android:id="@+id/panelButtons"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/buttonCreate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Crear producto" />
+
+        <Button
+            android:id="@+id/buttonScan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scanear código" />
+
+    </LinearLayout>
+
+    <!-- Aquí se cargará siempre el fragment hijo -->
+    <FrameLayout
+        android:id="@+id/childFragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+</FrameLayout>

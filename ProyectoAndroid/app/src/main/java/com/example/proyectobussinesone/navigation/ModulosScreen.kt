@@ -39,6 +39,7 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.proyectobussinesone.ComponenteKotlinPrueba.CalendarioConFichaje
 import com.example.proyectobussinesone.ComponenteKotlinPrueba.DetalleDiaScreen
+import com.example.proyectobussinesone.ComponenteProductos.Menu
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -301,7 +302,7 @@ fun Modulo2Screen() {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFFFD6A5)),
-        clazz = ComponentePrueba::class.java
+        clazz = Menu::class.java
     )
 }
 
