@@ -12,10 +12,24 @@
         android:id="@+id/previewView"
         android:layout_width="match_parent"
         android:layout_height="600dp" >
-
-
     </androidx.camera.view.PreviewView>
+    <ImageButton
+        android:id="@+id/btnConfirm"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_gravity="end"
+        android:layout_margin="20dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/baseline_check_circle_24"
+       />
 
+    <!--
+
+        app:backgroundTint="@android:color/transparent"
+        android:tint="@color/colorPrimary"
+
+        app:iconTint="#2196F3"
+    -->
     <Button
         android:id="@+id/buttonDetectStored"
         android:layout_width="wrap_content"
@@ -36,6 +50,7 @@
         android:layout_margin="16dp"
         android:background="@android:color/white"
         android:padding="8dp"
+        android:src="@null"
         android:contentDescription="Descripcion del barcode" />
 
 

@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -57,6 +58,8 @@ public class ComponentePrueba extends Fragment {
     private static final int REQUEST_CAMERA_PERMISSION = 1001;
     private BarcodeScanner scanner;
     private Map<String, Product> catalogMap;
+    private final List<String> detectedBarcodes = new ArrayList<>();
+
 
     // Clase auxiliar para productos
     static class Product {
@@ -80,11 +83,44 @@ public class ComponentePrueba extends Fragment {
 
         // Generar y mostrar un código de barras de ejemplo
         Bitmap bmp = generateBarcode("123456789012");
-        binding.imageViewBarcode.setImageBitmap(bmp);
+        binding.imageViewBarcode.setImageBitmap(null);
         saveBitmapToInternal(bmp, requireContext(), "barcode.png");
 
         // Configurar botón para detectar el código almacenado
-        binding.buttonDetectStored.setOnClickListener(v -> detectStoredBarcode());
+        binding.buttonDetectStored.setOnClickListener(v -> {
+            // Obtén un Bitmap de la vista previa; puede ser null si aún no hay frame listo
+            Bitmap previewBmp = binding.previewView.getBitmap();
+            if (previewBmp == null) {
+                Toast.makeText(requireContext(),
+                        "Aún no hay imagen de cámara disponible", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Procesa el Bitmap con ML Kit
+            InputImage image = InputImage.fromBitmap(previewBmp, 0);
+            scanner.process(image)
+                    .addOnSuccessListener(barcodes -> {
+                        if (!barcodes.isEmpty()) {
+                            String rawValue = barcodes.get(0).getRawValue();
+                            if (rawValue != null) {
+                                // Genera y muestra el barcode
+                                Bitmap barcodeBmp = generateBarcode(rawValue);
+                                binding.imageViewBarcode.setImageBitmap(barcodeBmp);
+                                // Guarda en la lista (permitiendo duplicados)
+                                detectedBarcodes.add(rawValue);
+                            }
+                        } else {
+                            Toast.makeText(requireContext(),
+                                    "No se detectó ningún código de barras", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("ComponentePrueba", "Error procesando imagen", e);
+                        Toast.makeText(requireContext(),
+                                "Error al procesar la imagen", Toast.LENGTH_SHORT).show();
+                    });
+        });
+
 
         return binding.getRoot();
     }
@@ -142,8 +178,13 @@ public class ComponentePrueba extends Fragment {
     private void handleBarcodes(List<Barcode> barcodes) {
         for (Barcode barcode : barcodes) {
             String rawValue = barcode.getRawValue();
-            showProductInfo(rawValue);
-            Log.d("ComponentePrueba", "Leido: " + rawValue);
+            if (rawValue != null && !detectedBarcodes.contains(rawValue)) {
+                detectedBarcodes.add(rawValue);
+                Bitmap barcodeBitmap = generateBarcode(rawValue);
+                binding.imageViewBarcode.setImageBitmap(barcodeBitmap);
+                showProductInfo(rawValue);
+                Log.d("ComponentePrueba", "Leído: " + rawValue);
+            }
         }
     }
 
@@ -164,7 +205,7 @@ public class ComponentePrueba extends Fragment {
         Product product = catalogMap.get(rawValue);
         if (product != null) {
             String msg = product.name + " — €" + product.price;
-            Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
+            Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(requireContext(), "Código no encontrado: " + rawValue,
                     Toast.LENGTH_SHORT).show();
