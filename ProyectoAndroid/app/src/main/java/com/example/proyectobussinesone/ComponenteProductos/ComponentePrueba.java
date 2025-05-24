@@ -25,6 +25,7 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.proyectobussinesone.R;
 import com.example.proyectobussinesone.databinding.FragmentComponentePruebaBinding;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
@@ -52,6 +53,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import androidx.lifecycle.ViewModelProvider;
+
 public class ComponentePrueba extends Fragment {
 
     private FragmentComponentePruebaBinding binding;
@@ -59,6 +62,8 @@ public class ComponentePrueba extends Fragment {
     private BarcodeScanner scanner;
     private Map<String, Product> catalogMap;
     private final List<String> detectedBarcodes = new ArrayList<>();
+    private SharedViewModel viewModel;
+
 
 
     // Clase auxiliar para productos
@@ -73,6 +78,8 @@ public class ComponentePrueba extends Fragment {
         super.onCreate(savedInstanceState);
         scanner = BarcodeScanning.getClient();
         catalogMap = loadCatalog(requireContext());
+        // Obtain shared ViewModel scoped to Activity
+        viewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
     }
 
     @Override
@@ -122,6 +129,14 @@ public class ComponentePrueba extends Fragment {
                     });
         });
 
+        binding.btnConfirm.setOnClickListener(v -> {
+            // navigate to list fragment
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.rootFragment, new BarcodeListFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
 
         return binding.getRoot();
     }

@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel;
 import java.util.ArrayList;
 import java.util.List;
 
-// SharedViewModel.java
 public class SharedViewModel extends ViewModel {
     private final MutableLiveData<List<String>> barcodes = new MutableLiveData<>(new ArrayList<>());
 
@@ -16,8 +15,12 @@ public class SharedViewModel extends ViewModel {
     }
 
     public void addBarcode(String code) {
-        List<String> current = barcodes.getValue();
+        List<String> current = new ArrayList<>(barcodes.getValue());
         current.add(code);
         barcodes.setValue(current);
+    }
+
+    public void clearBarcodes() {
+        barcodes.setValue(new ArrayList<>());
     }
 }
