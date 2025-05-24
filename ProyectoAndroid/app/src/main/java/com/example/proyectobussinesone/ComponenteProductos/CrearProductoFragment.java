@@ -194,6 +194,14 @@ public class CrearProductoFragment extends Fragment {
         }
         // Aquí guardas la ruta de photoFile y los datos
         Toast.makeText(requireContext(), "Datos guardados: " + name + " - €" + price, Toast.LENGTH_LONG).show();
+
+        // ✅ Limpiar información mostrada
+        binding.capturedImage.setImageDrawable(null);
+        binding.barcodeImage.setImageDrawable(null);
+        binding.editName.setText("");
+        binding.editPrice.setText("");
+        photoFile = null; // Reinicia el estado de la foto también
+
     }
 
     @Override

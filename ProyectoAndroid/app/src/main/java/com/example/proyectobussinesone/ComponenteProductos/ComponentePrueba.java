@@ -108,6 +108,7 @@ public class ComponentePrueba extends Fragment {
                                 binding.imageViewBarcode.setImageBitmap(barcodeBmp);
                                 // Guarda en la lista (permitiendo duplicados)
                                 detectedBarcodes.add(rawValue);
+                                showProductInfo(rawValue);
                             }
                         } else {
                             Toast.makeText(requireContext(),
@@ -147,13 +148,12 @@ public class ComponentePrueba extends Fragment {
                 Preview preview = new Preview.Builder().build();
                 preview.setSurfaceProvider(previewView.getSurfaceProvider());
 
-                ImageAnalysis analysis = new ImageAnalysis.Builder()
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .build();
-                analysis.setAnalyzer(ContextCompat.getMainExecutor(requireContext()), this::processImageProxy);
+                cameraProvider.bindToLifecycle(this,
+                        CameraSelector.DEFAULT_BACK_CAMERA,
+                        preview);
 
-                cameraProvider.unbindAll();
-                cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis);
+                //cameraProvider.unbindAll();
+                //cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis);
 
             } catch (ExecutionException | InterruptedException e) {
                 Log.e("ComponentePrueba", "Error al iniciar cámara", e);
