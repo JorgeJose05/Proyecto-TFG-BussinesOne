@@ -42,6 +42,7 @@ import java.util.concurrent.ExecutionException;
 
 public class CrearProductoFragment extends Fragment {
 
+    private boolean cameraStarted = false;
     private FragmentCrearProductoBinding binding;
     private static final int REQUEST_CAMERA_PERMISSION = 101;
     private ImageCapture imageCapture;
@@ -75,29 +76,57 @@ public class CrearProductoFragment extends Fragment {
     }
 
     private void startCamera() {
+        if (cameraStarted) return;
+        cameraStarted = true;
+
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture =
                 ProcessCameraProvider.getInstance(requireContext());
+
         cameraProviderFuture.addListener(() -> {
             try {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
-                Preview preview = new Preview.Builder().build();
+
+                // 🔁 Desvincula cualquier caso de uso existente
+                cameraProvider.unbindAll();
+
+                // ✅ Construye el preview
+                Preview preview = new Preview.Builder()
+                        .setTargetResolution(new android.util.Size(640, 480))
+                        .build();
                 preview.setSurfaceProvider(binding.previewView.getSurfaceProvider());
 
+                // ✅ Configura imageCapture con una resolución reducida
                 imageCapture = new ImageCapture.Builder()
-                        .setTargetRotation(requireActivity().getWindowManager().getDefaultDisplay().getRotation())
+                        .setTargetResolution(new android.util.Size(640, 480))
                         .build();
 
-                cameraProvider.unbindAll();
-                cameraProvider.bindToLifecycle(this,
-                        CameraSelector.DEFAULT_BACK_CAMERA,
+                // 📷 Selecciona cámara trasera
+                CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
+
+                // ✅ Vincula sólo 2 casos de uso: Preview e ImageCapture
+                cameraProvider.bindToLifecycle(
+                        getViewLifecycleOwner(),
+                        cameraSelector,
                         preview,
-                        imageCapture);
+                        imageCapture
+                );
+
             } catch (ExecutionException | InterruptedException e) {
-                Log.e("PhotoCapture", "Error initializing camera", e);
+                Log.e("CameraX", "Error al inicializar la cámara", e);
+            } catch (IllegalArgumentException e) {
+                Log.e("CameraX", "No se pudo vincular: demasiados casos de uso", e);
+                Toast.makeText(requireContext(), "No se pudo iniciar la cámara: combinación no compatible.", Toast.LENGTH_LONG).show();
             }
         }, ContextCompat.getMainExecutor(requireContext()));
     }
 
+    @Override
+    public void onDestroyView() {
+        // Necesario para evitar que CameraX mantenga las referencias
+        binding = null;
+        cameraStarted = false;
+        super.onDestroyView();
+    }
 
     private Bitmap rotateBitmapIfRequired(String photoPath) throws IOException {
         ExifInterface exif = new ExifInterface(photoPath);

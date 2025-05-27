@@ -17,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ExperimentalGetImage;
-import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
@@ -25,6 +24,7 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.proyectobussinesone.ComponenteProductos.models.Product;
 import com.example.proyectobussinesone.R;
 import com.example.proyectobussinesone.databinding.FragmentComponentePruebaBinding;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -45,7 +45,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -66,12 +65,7 @@ public class ComponentePrueba extends Fragment {
 
 
 
-    // Clase auxiliar para productos
-    static class Product {
-        String code;
-        String name;
-        double price;
-    }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -110,16 +104,28 @@ public class ComponentePrueba extends Fragment {
                         if (!barcodes.isEmpty()) {
                             String rawValue = barcodes.get(0).getRawValue();
                             if (rawValue != null) {
-                                // Genera y muestra el barcode
-                                Bitmap barcodeBmp = generateBarcode(rawValue);
-                                binding.imageViewBarcode.setImageBitmap(barcodeBmp);
-                                // Guarda en la lista (permitiendo duplicados)
-                                detectedBarcodes.add(rawValue);
-                                showProductInfo(rawValue);
+                                // 1) Obtén el objeto Product de tu catálogo
+                                Product prod = catalogMap.get(rawValue);
+                                if (prod != null) {
+                                    // 2) Añádelo al ViewModel compartido
+                                    viewModel.addProduct(prod);
+
+                                    // 3) Genera y muestra el bitmap del código
+                                    Bitmap barcodeBmp = generateBarcode(rawValue);
+                                    binding.imageViewBarcode.setImageBitmap(barcodeBmp);
+
+                                    // 4) Muestra la info del producto
+                                    showProductInfo(rawValue);
+                                } else {
+                                    Toast.makeText(requireContext(),
+                                            "Producto no encontrado para: " + rawValue,
+                                            Toast.LENGTH_SHORT).show();
+                                }
                             }
                         } else {
                             Toast.makeText(requireContext(),
-                                    "No se detectó ningún código de barras", Toast.LENGTH_SHORT).show();
+                                    "No se detectó ningún código de barras",
+                                    Toast.LENGTH_SHORT).show();
                         }
                     })
                     .addOnFailureListener(e -> {
@@ -127,14 +133,15 @@ public class ComponentePrueba extends Fragment {
                         Toast.makeText(requireContext(),
                                 "Error al procesar la imagen", Toast.LENGTH_SHORT).show();
                     });
+
         });
 
         binding.btnConfirm.setOnClickListener(v -> {
             // navigate to list fragment
-            requireActivity().getSupportFragmentManager()
+            getParentFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.rootFragment, new BarcodeListFragment())
-                    .addToBackStack(null)
+                    .replace(R.id.childFragmentContainer, new ProductListFragment())
+                    .addToBackStack(null)     // para poder volver atrás
                     .commit();
         });
 
