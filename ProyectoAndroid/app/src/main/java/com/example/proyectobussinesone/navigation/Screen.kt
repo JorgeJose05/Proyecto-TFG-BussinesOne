@@ -22,11 +22,9 @@ import com.example.proyectobussinesone.ui.screens.PantallaIniciarSesion
 sealed class Screen(val route: String, val title: String,val icon: ImageVector) {
     object Home     : Screen("modulos",     "Modulos",  Icons.Filled.Apps)
     object Profile  : Screen("profile",  "Perfil", Icons.Filled.Person)
-    object Settings : Screen("settings", "Ajustes", Icons.Filled.Settings)
-}
+  }
 
 val tabs = listOf(
     Screen.Home,
-    Screen.Settings,
     Screen.Profile,
 )

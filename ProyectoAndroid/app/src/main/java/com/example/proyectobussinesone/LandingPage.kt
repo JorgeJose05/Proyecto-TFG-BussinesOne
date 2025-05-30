@@ -8,15 +8,13 @@ import androidx.navigation.compose.rememberNavController
 import com.example.proyectobussinesone.navigation.MainScreen
 import com.example.proyectobussinesone.navigation.ModulosScreen
 import com.example.proyectobussinesone.navigation.ProfileScreen
-import com.example.proyectobussinesone.navigation.SettingsScreen
 
 sealed class Screen(val route: String, val title: String) {
     object Home : Screen("home", "Inicio")
     object Profile : Screen("profile", "Perfil")
-    object Settings : Screen("settings", "Ajustes")
 }
 
-val tabs = listOf(Screen.Home, Screen.Profile, Screen.Settings)
+val tabs = listOf(Screen.Home, Screen.Profile)
 
 
 @Composable
@@ -29,6 +27,5 @@ fun AppNavHost(navController: NavHostController) {
     NavHost(navController, startDestination = Screen.Home.route) {
         composable(Screen.Home.route) { ModulosScreen() }
         composable(Screen.Profile.route) { ProfileScreen() }
-        composable(Screen.Settings.route) { SettingsScreen() }
     }
 }

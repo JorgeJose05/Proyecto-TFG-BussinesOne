@@ -80,8 +80,7 @@ fun MainScreen(navController : NavHostController) {
             startDestination = Screen.Home.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.Home.route)     { ModulosScreen()    }
-            composable(Screen.Settings.route) { SettingsScreen() }
+            composable(Screen.Home.route)     { ModulosScreen() }
             composable(Screen.Profile.route)  { ProfileScreen() }
         }
     }

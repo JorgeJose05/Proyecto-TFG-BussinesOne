@@ -51,24 +51,8 @@ fun PantallaIniciarSesion(navController: NavHostController) {
         }
 
         LabeleInput("Usuario", "Correo electronico")
-
         LabeleInput("Contraseña","Contraseña")
 
-
-        Text(
-            text = "¿Has olvidado tu contraseña?",
-            textAlign = TextAlign.Left,
-            color = Color(0xFF1976D2), // azul como link
-            textDecoration = TextDecoration.Underline,
-            modifier = Modifier
-                .clickable(
-                    indication = null, // Elimina la animación ripple
-                    interactionSource = interactionSourceForgetPasword
-                ) {
-                   navController.navigate("pantalla_recuperacion_de_correo")
-                }
-                .padding(start = 8.dp)
-        )
 
         Button(
             onClick = { navController.navigate("landing_page") },
