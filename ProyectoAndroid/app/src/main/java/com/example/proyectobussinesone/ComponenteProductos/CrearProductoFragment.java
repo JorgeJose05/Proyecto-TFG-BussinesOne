@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,10 @@ import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.content.ContextCompat;
 
+import com.example.proyectobussinesone.ApiService;
+import com.example.proyectobussinesone.ComponenteProductos.models.Product;
+import com.example.proyectobussinesone.ComponenteProductos.models.ProductoPostRequestDto;
+import com.example.proyectobussinesone.ComponenteProductos.models.ProductoViewModel;
 import com.example.proyectobussinesone.databinding.FragmentCrearProductoBinding;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.zxing.BarcodeFormat;
@@ -34,11 +39,16 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class CrearProductoFragment extends Fragment {
 
@@ -46,7 +56,10 @@ public class CrearProductoFragment extends Fragment {
     private FragmentCrearProductoBinding binding;
     private static final int REQUEST_CAMERA_PERMISSION = 101;
     private ImageCapture imageCapture;
+    private Long usuarioCreadorId;
+    private String barcode;
     private File photoFile;
+    private String image64bits;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -156,7 +169,7 @@ public class CrearProductoFragment extends Fragment {
     private void takePhoto() {
         if (imageCapture == null) return;
         // Create file in cache
-        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
+        String timestamp = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US)
                 .format(System.currentTimeMillis());
         photoFile = new File(requireContext().getCacheDir(), "IMG_" + timestamp + ".jpg");
 
@@ -171,7 +184,13 @@ public class CrearProductoFragment extends Fragment {
                             Bitmap corrected = rotateBitmapIfRequired(photoFile.getAbsolutePath());
                             binding.capturedImage.setImageBitmap(corrected);
 
-                            Bitmap barcodeBmp = generateBarcode(timestamp);
+                            // Generar código de barras numérico aleatorio de 9 dígitos
+                            int randomCode = (int) (Math.random() * 900000000) + 100000000; // asegura 9 dígitos
+                            barcode = String.valueOf(randomCode);
+
+
+                            Bitmap barcodeBmp = generateBarcode(barcode);
+
                             binding.barcodeImage.setImageBitmap(barcodeBmp);
                             int paddingPx = (int)(4 * getResources().getDisplayMetrics().density);
 
@@ -213,6 +232,8 @@ public class CrearProductoFragment extends Fragment {
     private void saveData() {
         String name = binding.editName.getText().toString().trim();
         String price = binding.editPrice.getText().toString().trim();
+        Double priceDouble = price.isEmpty() ? 0.0 : Double.parseDouble(price);
+
         if (photoFile == null) {
             Toast.makeText(requireContext(), "Toma una foto primero", Toast.LENGTH_SHORT).show();
             return;
@@ -221,7 +242,41 @@ public class CrearProductoFragment extends Fragment {
             Toast.makeText(requireContext(), "Rellena nombre y precio", Toast.LENGTH_SHORT).show();
             return;
         }
-        // Aquí guardas la ruta de photoFile y los datos
+
+        // 1) Decodificar el JPEG desde el File a Bitmap:
+        Bitmap bitmap = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
+        if (bitmap == null) {
+            Toast.makeText(requireContext(), "No se pudo leer la imagen", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 1) Comprimir el Bitmap a JPEG en un ByteArrayOutputStream:
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
+        byte[] jpegBytes = baos.toByteArray();
+
+        // 2) Codificar a Base64 (sin saltos de línea):
+        String fotoBase64 = Base64.encodeToString(jpegBytes, Base64.NO_WRAP);
+
+        Log.d("CrearProducto", "Imagen en Base64:\n" + fotoBase64);
+
+        int barcodeInt;
+        try {
+            barcodeInt = Integer.parseInt(barcode);
+        } catch (NumberFormatException e) {
+            Toast.makeText(requireContext(), "El código de barras no es un número válido", Toast.LENGTH_SHORT).show();
+            Log.e("CrearProducto", "El código de barras no es un número válido", e);
+            Log.e("CodigoDelProducto",barcode);
+            return;
+        }
+
+        ProductoPostRequestDto productofinal = new ProductoPostRequestDto(name,priceDouble, fotoBase64, barcodeInt,1L);
+
+        ProductoViewModel viewModel = new ProductoViewModel();
+
+        viewModel.crearProducto(productofinal);
+
+
         Toast.makeText(requireContext(), "Datos guardados: " + name + " - €" + price, Toast.LENGTH_LONG).show();
 
         // ✅ Limpiar información mostrada
@@ -232,6 +287,8 @@ public class CrearProductoFragment extends Fragment {
         photoFile = null; // Reinicia el estado de la foto también
 
     }
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,

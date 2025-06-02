@@ -11,13 +11,15 @@ public class Product {
     public double price;
     public String imagePath;    // o String imageBase64; o Uri imageUri;
     public int quantity;
+    public Long creatorId;
 
-    public Product(String code, String name, double price, String imagePath, int quantity) {
+    public Product(String code, String name, double price, String imagePath, int quantity, long creatorId) {
         this.code = code;
         this.name = name;
         this.price = price;
         this.quantity = quantity;
         this.imagePath = imagePath;
+        this.creatorId = creatorId;
     }
 
     public Product(Product other) {
@@ -26,6 +28,7 @@ public class Product {
         this.price = other.price;
         this.imagePath = other.imagePath;
         this.quantity = other.quantity;
+        this.creatorId = other.creatorId;
     }
 
 
@@ -43,7 +46,7 @@ public class Product {
 
     @Override
     public int hashCode() {
-        return Objects.hash(code, name, price, imagePath,quantity);
+        return Objects.hash(code, name, price, imagePath,quantity, creatorId);
     }
 
     // Constructor, getters y setters

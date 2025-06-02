@@ -33,13 +33,17 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.text.font.FontWeight
 import com.example.proyectobussinesone.ComponenteProductos.ComponentePrueba
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.fragment.compose.AndroidFragment
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.proyectobussinesone.ComponenteKotlinPrueba.CalendarioConFichaje
 import com.example.proyectobussinesone.ComponenteKotlinPrueba.DetalleDiaScreen
 import com.example.proyectobussinesone.ComponenteProductos.Menu
+import com.example.proyectobussinesone.ModuloViewStateB
+import com.example.proyectobussinesone.ModuloViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -153,72 +157,39 @@ fun ModulosScreen() {
 // Definimos las pantallas
 
 @Composable
-fun TiendaScreen() {
-    // Lista de productos simulada
-    val modulosDisponibles = listOf(
-        ModuloStoreItem(
-            icon = Icons.Default.Inventory,
-            categoria = "Inventario",
-            nombre = "Gestión de Inventario",
-            descripcion = "Controla y gestiona tu stock de productos de manera eficiente."
-        ),
-        ModuloStoreItem(
-            icon = Icons.Default.Person,
-            categoria = "Clientes",
-            nombre = "CRM de Clientes",
-            descripcion = "Administra las relaciones con tus clientes y mejora la fidelización."
-        ),
-        ModuloStoreItem(
-            icon = Icons.Default.Receipt,
-            categoria = "Facturación",
-            nombre = "Facturación Electrónica",
-            descripcion = "Genera y envía facturas electrónicas cumpliendo con la normativa vigente."
-        ),
-        ModuloStoreItem(
-            icon = Icons.Default.Analytics,
-            categoria = "Ventas",
-            nombre = "Análisis de Ventas",
-            descripcion = "Obtén informes detallados sobre el rendimiento de tus ventas."
-        ),
-        ModuloStoreItem(
-            icon = Icons.Default.Build,
-            categoria = "Proyectos",
-            nombre = "Gestión de Proyectos",
-            descripcion = "Planifica y supervisa tus proyectos desde una única plataforma."
-        ),
-        ModuloStoreItem(
-            icon = Icons.Default.AccountBalance,
-            categoria = "Contabilidad",
-            nombre = "Contabilidad Avanzada",
-            descripcion = "Lleva un control preciso de tus finanzas y contabilidad."
-        ),
-        ModuloStoreItem(
-            icon = Icons.Default.SupportAgent,
-            categoria = "Soporte",
-            nombre = "Soporte Técnico",
-            descripcion = "Gestiona las solicitudes de soporte y mejora la atención al cliente."
-        ),
-        ModuloStoreItem(
-            icon = Icons.Default.Group,
-            categoria = "Recursos Humanos",
-            nombre = "Gestión de Recursos Humanos",
-            descripcion = "Administra la información y procesos relacionados con tu personal."
-        ),
-        ModuloStoreItem(
-            icon = Icons.Default.Campaign,
-            categoria = "Marketing",
-            nombre = "Módulo de Marketing",
-            descripcion = "Diseña y ejecuta campañas de marketing efectivas."
-        ),
-        ModuloStoreItem(
-            icon = Icons.Default.ShoppingCart,
-            categoria = "eCommerce",
-            nombre = "Integración con eCommerce",
-            descripcion = "Conecta tu tienda en línea y sincroniza automáticamente los datos."
-        )
-    )
+fun TiendaScreen(  vm: ModuloViewModel = viewModel() ) {
 
+    // 4.1 Recogemos el estado
+    val uiState = vm.uiState.collectAsState()
+
+    // 4.2 Estado de búsqueda
     var query by rememberSaveable { mutableStateOf("") }
+
+    // 4.3 Listado filtrado (inicialmente vacío hasta que llegue Success)
+    val modulosDisponibles = remember(query, uiState.value) {
+        when (val state = uiState.value) {
+            is ModuloViewStateB.Loading -> emptyList<ModuloStoreItem>()
+            is ModuloViewStateB.Error   -> emptyList()
+            is ModuloViewStateB.Success -> {
+                // Mapeamos cada ModuloDto a ModuloStoreItem
+                state.lista.map { dto ->
+                    ModuloStoreItem(
+                        icon = iconoDesdeNombre(dto.icono),
+                        categoria = dto.grupo,
+                        nombre = dto.nombre,
+                        descripcion = "Aquí va la descripción real"
+                    )
+                }
+                    // Después filtramos por query:
+                    .filter {
+                        it.nombre.contains(query, ignoreCase = true)
+                                || it.categoria.contains(query, ignoreCase = true)
+                                || it.descripcion.contains(query, ignoreCase = true)
+                    }
+            }
+        }
+    }
+
 
     // Filtrar productos según la consulta
     val modulosFiltrados = modulosDisponibles.filter {
@@ -281,6 +252,27 @@ fun TiendaScreen() {
                 }
             }
         }
+    }
+}
+
+fun iconoDesdeNombre(nombreIcono: String): ImageVector {
+    return when (nombreIcono) {
+        "Inventario"      -> Icons.Default.Inventory
+        "Clientes"         -> Icons.Default.Person
+        "Facturación"        -> Icons.Default.Receipt
+        "Ventas"      -> Icons.Default.Analytics
+        "Proyectos"          -> Icons.Default.Build
+        "Contabilidad" -> Icons.Default.AccountBalance
+        "Soporte"   -> Icons.Default.SupportAgent
+        "Recursos Humanos"          -> Icons.Default.Group
+        "Marketing"       -> Icons.Default.Campaign
+        "eCommerce"   -> Icons.Default.ShoppingCart
+        "Administración" -> Icons.Default.Accessibility
+        "Catálogo" -> Icons.Default.MenuBook
+        "Informes" -> Icons.Default.BarChart
+        "Reportes" -> Icons.Default.Description
+
+        else             -> Icons.Default.HelpOutline
     }
 }
 
