@@ -277,7 +277,7 @@ public class CrearProductoFragment extends Fragment {
         viewModel.crearProducto(productofinal);
 
 
-        Toast.makeText(requireContext(), "Datos guardados: " + name + " - €" + price, Toast.LENGTH_LONG).show();
+        Toast.makeText(requireContext(), "Datos guardados: " + name  + price + " - €", Toast.LENGTH_LONG).show();
 
         // ✅ Limpiar información mostrada
         binding.capturedImage.setImageDrawable(null);

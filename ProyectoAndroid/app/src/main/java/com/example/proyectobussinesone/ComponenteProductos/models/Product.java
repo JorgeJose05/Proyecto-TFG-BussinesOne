@@ -3,14 +3,22 @@ package com.example.proyectobussinesone.ComponenteProductos.models;
 // Clase auxiliar para productos
 
 import androidx.annotation.NonNull;
+
+import com.google.gson.annotations.SerializedName;
+
 import java.util.Objects;
 
 public class Product {
+    @SerializedName("codigo")
     public String code;
+    @SerializedName("nombre")
     public String name;
+    @SerializedName("precio")
     public double price;
+    @SerializedName("foto")
     public String imagePath;    // o String imageBase64; o Uri imageUri;
     public int quantity;
+    //@SerializedName("usuarioCreador")
     public Long creatorId;
 
     public Product(String code, String name, double price, String imagePath, int quantity, long creatorId) {

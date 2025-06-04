@@ -24,8 +24,10 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.proyectobussinesone.ApiService;
 import com.example.proyectobussinesone.ComponenteProductos.models.Product;
 import com.example.proyectobussinesone.R;
+import com.example.proyectobussinesone.RetrofitClient;
 import com.example.proyectobussinesone.databinding.FragmentComponentePruebaBinding;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
@@ -54,12 +56,15 @@ import java.util.concurrent.ExecutionException;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class ComponentePrueba extends Fragment {
 
     private FragmentComponentePruebaBinding binding;
     private static final int REQUEST_CAMERA_PERMISSION = 1001;
     private BarcodeScanner scanner;
-    private Map<String, Product> catalogMap;
     private final List<String> detectedBarcodes = new ArrayList<>();
     private SharedViewModel viewModel;
 
@@ -71,8 +76,6 @@ public class ComponentePrueba extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         scanner = BarcodeScanning.getClient();
-        catalogMap = loadCatalog(requireContext());
-        // Obtain shared ViewModel scoped to Activity
         viewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
     }
 
@@ -81,11 +84,6 @@ public class ComponentePrueba extends Fragment {
                              ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentComponentePruebaBinding.inflate(inflater, container, false);
-
-        // Generar y mostrar un código de barras de ejemplo
-        Bitmap bmp = generateBarcode("123456789012");
-        binding.imageViewBarcode.setImageBitmap(null);
-        saveBitmapToInternal(bmp, requireContext(), "barcode.png");
 
         // Configurar botón para detectar el código almacenado
         binding.buttonDetectStored.setOnClickListener(v -> {
@@ -103,9 +101,11 @@ public class ComponentePrueba extends Fragment {
                     .addOnSuccessListener(barcodes -> {
                         if (!barcodes.isEmpty()) {
                             String rawValue = barcodes.get(0).getRawValue();
-                            if (rawValue != null) {
+                            if (rawValue != null && !detectedBarcodes.contains(rawValue)) {
+                                fetchAndAddProduct(rawValue);
+                                /*
                                 // 1) Obtén el objeto Product de tu catálogo
-                                Product prod = catalogMap.get(rawValue);
+                                Product prod = getProductoByCode(rawValue);
                                 if (prod != null) {
                                     // 2) Añádelo al ViewModel compartido
                                     viewModel.addProduct(prod);
@@ -121,6 +121,13 @@ public class ComponentePrueba extends Fragment {
                                             "Producto no encontrado para: " + rawValue,
                                             Toast.LENGTH_SHORT).show();
                                 }
+                                */
+                            }else{
+                                Toast.makeText(requireContext(),
+                                        "Producto no encontrado para: " + rawValue,
+                                        Toast.LENGTH_SHORT).show();
+                                Log.e("ComponentePrueba", "Respuesta no exitosa: HTTP ");
+
                             }
                         } else {
                             Toast.makeText(requireContext(),
@@ -146,6 +153,59 @@ public class ComponentePrueba extends Fragment {
         });
 
         return binding.getRoot();
+    }
+
+    private void fetchAndAddProduct(String rawValue) {
+        ApiService api = RetrofitClient.INSTANCE.getModuloApiService();
+        // Endpoint definido así: @GET("productos/GET/{id}") Call<Product> getProductoPorId(... )
+        Call<Product> call = api.getProductoPorId(rawValue);
+
+        call.enqueue(new Callback<Product>() {
+            @Override
+            public void onResponse(@NonNull Call<Product> call, @NonNull Response<Product> response) {
+                // 1) Logueamos el código HTTP
+                Log.d("ComponentePrueba", "onResponse: HTTP " + response.code());
+                Log.d("ComponentePrueba", "Body: boyd " + response.body());
+                if (response.isSuccessful() && response.body() != null) {
+                    Product prod = response.body();
+
+                    // 4) Imprimimos en logcat los campos que vienen en prod
+                    Log.d("ComponentePrueba", "Product recibido – código: " + prod.code
+                            + ", name: " + prod.name
+                            + ", price: " + prod.price
+                            + ", imagePath: " + prod.imagePath
+                            + ", quantity: " + prod.quantity
+                            + ", creatorId: " + prod.creatorId);
+                    // 2) Lo agregamos al ViewModel compartido
+                    viewModel.addProduct(prod);
+
+                    // 3) Mostramos el bitmap del código escaneado
+                    Bitmap barcodeBmp = generateBarcode(rawValue);
+                    binding.imageViewBarcode.setImageBitmap(barcodeBmp);
+
+                    // 4) Mensaje de éxito con el nombre y precio
+                    Toast.makeText(requireContext(),
+                            prod.name + " — €" + prod.price,
+                            Toast.LENGTH_SHORT).show();
+                    detectedBarcodes.add(rawValue);
+                } else {
+                    // Si el servidor devolvió 404, 400, etc. o body == null
+                    Toast.makeText(requireContext(),
+                            "Producto no encontrado para: " + rawValue,
+                            Toast.LENGTH_SHORT).show();
+                    Log.e("ComponentePrueba", "Respuesta no exitosa: HTTP " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Product> call, @NonNull Throwable t) {
+                // Error de red, servidor caído, etc.
+                Toast.makeText(requireContext(),
+                        "Error al conectar con el servidor: " + t.getMessage(),
+                        Toast.LENGTH_LONG).show();
+                Log.e("ComponentePrueba", "onFailure Retrofit: ", t);
+            }
+        });
     }
 
     @Override
@@ -204,7 +264,6 @@ public class ComponentePrueba extends Fragment {
                 detectedBarcodes.add(rawValue);
                 Bitmap barcodeBitmap = generateBarcode(rawValue);
                 binding.imageViewBarcode.setImageBitmap(barcodeBitmap);
-                showProductInfo(rawValue);
                 Log.d("ComponentePrueba", "Leído: " + rawValue);
             }
         }
@@ -223,30 +282,6 @@ public class ComponentePrueba extends Fragment {
         }
     }
 
-    private void showProductInfo(String rawValue) {
-        Product product = catalogMap.get(rawValue);
-        if (product != null) {
-            String msg = product.name + " — €" + product.price;
-            Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(requireContext(), "Código no encontrado: " + rawValue,
-                    Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private Map<String, Product> loadCatalog(Context ctx) {
-        try (InputStream is = ctx.getAssets().open("barcodes.json")) {
-            String json = readStreamToString(is);
-            Type listType = new TypeToken<List<Product>>() {}.getType();
-            List<Product> list = new Gson().fromJson(json, listType);
-            Map<String, Product> map = new HashMap<>();
-            for (Product p : list) map.put(p.code, p);
-            return map;
-        } catch (IOException e) {
-            Log.e("ComponentePrueba", "Error cargando catálogo", e);
-            return Collections.emptyMap();
-        }
-    }
 
     private String readStreamToString(InputStream is) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
