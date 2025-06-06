@@ -39,6 +39,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.proyectobussinesone.MainActivity
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -54,6 +55,7 @@ fun DetalleDiaScreen(
     var inputOutTime by remember { mutableStateOf("") }
     // ViewModel
     val context = LocalContext.current
+
     val viewModel: TimeTrackerViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
@@ -217,6 +219,7 @@ private fun AjusteDialog(
     onCancel: () -> Unit
 ) {
 
+    val userId = MainActivity.UsuarioSesion.getUserId(LocalContext.current)
     fun normalize(input: String): String {
         val trimmed = input.trim()
         return when {
@@ -257,7 +260,7 @@ private fun AjusteDialog(
                     null
                 }
 
-                val empleadoId = 2L // <-- reemplaza por el ID real del empleado
+                val empleadoId = userId // <-- reemplaza por el ID real del empleado
 
                 viewModel.crearFichaje(
                     empleadoId  = empleadoId,

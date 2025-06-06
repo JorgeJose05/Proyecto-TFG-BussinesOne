@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -38,6 +39,11 @@ import com.example.proyectobussinesone.ui.theme.ProyectoBussinesOneTheme
 fun PantallaRegistro(navController: NavHostController) {
     val interactionSourceForgetPasword = remember { MutableInteractionSource() }
     val interactionSourceRegister = remember { MutableInteractionSource() }
+
+    val email = remember { mutableStateOf("") }
+    val contrasena = remember { mutableStateOf("") }
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -59,9 +65,19 @@ fun PantallaRegistro(navController: NavHostController) {
             )
         }
 
-        LabeleInput("Usuario", "Correo electronico")
+        OutlinedTextField(
+            value = email.value,
+            onValueChange = { email.value = it },
+            label = { Text("Correo electrónico") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
-        LabeleInput("Contraseña","Contraseña")
+        OutlinedTextField(
+            value = contrasena.value,
+            onValueChange = { contrasena.value = it },
+            label = { Text("Contraseña") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
 
         Button(

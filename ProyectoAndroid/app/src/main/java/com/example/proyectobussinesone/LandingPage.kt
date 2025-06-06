@@ -1,6 +1,7 @@
 package com.example.proyectobussinesone
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,8 +25,9 @@ fun LandingPage(navController: NavHostController) {
 }
 @Composable
 fun AppNavHost(navController: NavHostController) {
+    val userId = MainActivity.UsuarioSesion.getUserId(LocalContext.current)
     NavHost(navController, startDestination = Screen.Home.route) {
         composable(Screen.Home.route) { ModulosScreen() }
-        composable(Screen.Profile.route) { ProfileScreen(usuarioId = 2L) }
+        composable(Screen.Profile.route) { ProfileScreen(usuarioId = userId) }
     }
 }

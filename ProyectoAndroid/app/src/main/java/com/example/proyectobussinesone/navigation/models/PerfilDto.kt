@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class PerfilDto(
     @SerializedName("id") val id: Long,
     @SerializedName("nombre") val nombre: String,
+    @SerializedName("contrasena") val contrasena: String?,
     @SerializedName("email") val email: String,
     @SerializedName("telefono") val telefono: String?,
     @SerializedName("direccion") val direccion: String?,

@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.proyectobussinesone.RetrofitClient
+import com.example.proyectobussinesone.ui.viewmodel.PerfilViewModel
 
 @Composable
 fun AcademicSection(
@@ -200,7 +201,8 @@ fun ProfileScreen(usuarioId: Long) {
 
     // Observamos el estado
     val perfil by vm.perfilState.collectAsState()
-    val errorMsg by vm.error.collectAsState()
+    val errorMsg by vm.errorMessage.collectAsState()
+
 
     // Mostramos mientras carga o error
     when {

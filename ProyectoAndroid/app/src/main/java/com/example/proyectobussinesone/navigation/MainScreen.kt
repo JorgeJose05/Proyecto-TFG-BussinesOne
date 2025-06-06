@@ -19,6 +19,8 @@ import androidx.compose.material.Tab
 import androidx.compose.material.Text
 import androidx.compose.material.Icon
 import androidx.compose.material.TabRow
+import androidx.compose.ui.platform.LocalContext
+import com.example.proyectobussinesone.MainActivity
 import com.example.proyectobussinesone.ui.theme.ProyectoBussinesOneTheme
 
 
@@ -29,6 +31,9 @@ fun MainScreen(navController : NavHostController) {
     // 3.2 Para saber qué pestaña va activa
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
+
+    val userId = MainActivity.UsuarioSesion.getUserId(LocalContext.current)
+
 
     Scaffold(
         bottomBar = {
@@ -81,7 +86,7 @@ fun MainScreen(navController : NavHostController) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route)     { ModulosScreen() }
-            composable(Screen.Profile.route)  { ProfileScreen(usuarioId = 2L) }
+            composable(Screen.Profile.route)  { ProfileScreen(usuarioId = userId) }
         }
     }
 }

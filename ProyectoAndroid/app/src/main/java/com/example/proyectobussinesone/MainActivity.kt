@@ -2,6 +2,7 @@ package com.example.proyectobussinesone
 
 
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -30,6 +31,15 @@ import com.example.proyectobussinesone.ui.screens.PreviewPantallaCorreoDeRecuper
 import com.example.proyectobussinesone.ui.theme.ProyectoBussinesOneTheme
 
 class MainActivity : AppCompatActivity() {
+
+    object UsuarioSesion {
+        fun getUserId(context: Context): Long {
+            val sharedPref = context.getSharedPreferences("UsuarioPrefs", Context.MODE_PRIVATE)
+            return sharedPref.getLong("userId", -1L)
+        }
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

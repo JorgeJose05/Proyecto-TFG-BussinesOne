@@ -1,53 +1,106 @@
-package com.example.proyectobussinesone.navigation
+// File: PerfilViewModel.kt
+package com.example.proyectobussinesone.ui.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
+import android.content.ContentValues.TAG
+import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.proyectobussinesone.navigation.models.PerfilDto
+import com.example.proyectobussinesone.navigation.PerfilRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
+data class Perfil(
+    val id: Long,
+    val nombre: String,
+    val email: String,
+    val contrasena: String?,
+    val telefono: String?,
+    val direccion: String?,
+    val formacionAcademica: String?,
+    val datosPersonales: String?,
+    val dni: String?,
+    val fechaNacimiento: String?,
+    val numeroSeguridadSocial: String?,
+    val iban: String?
+)
 
 class PerfilViewModel(
     private val repository: PerfilRepository,
-    private val usuarioId: Long
+    private val usuarioId: Long? = null
 ) : ViewModel() {
 
-    private val _perfilState = MutableStateFlow<PerfilDto?>(null)
-    val perfilState: StateFlow<PerfilDto?> = _perfilState
-
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error
-
-    init {
-        cargarPerfil()
+    // — Estados para el flujo de login —
+    sealed class LoginState {
+        object Idle : LoginState()
+        object Loading : LoginState()
+        data class Success(val perfil: Perfil) : LoginState()
+        data class Error(val message: String) : LoginState()
     }
 
-    private fun cargarPerfil() {
-        viewModelScope.launch {
-            try {
-                val perfil = repository.getPerfil(usuarioId)
-                _perfilState.value = perfil
-            } catch (e: Exception) {
-                _error.value = e.localizedMessage ?: "Error desconocido"
+    private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
+    val loginState: StateFlow<LoginState> = _loginState
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
+
+    private val _perfilState = MutableStateFlow<Perfil?>(null)
+    val perfilState: StateFlow<Perfil?> = _perfilState
+
+
+    init {
+        if (usuarioId != null) {
+            viewModelScope.launch {
+                try {
+                    _perfilState.value = repository.obtenerPerfilPorId(usuarioId)
+                } catch (e: Exception) {
+                    _errorMessage.value = "Error cargando perfil: ${e.message}"
+                }
             }
         }
     }
 
-    // ------------------------ Factory ------------------------
-    class Factory(
-        private val repository: PerfilRepository,
-        private val usuarioId: Long
-    ) : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(PerfilViewModel::class.java)) {
-                return PerfilViewModel(repository, usuarioId) as T
+    /**
+     * Trata de iniciar sesión comparando email y contraseña contra todos los perfiles de la API.
+     */
+    fun login(context: Context, email: String, contrasena: String) {
+        viewModelScope.launch {
+            _loginState.value = LoginState.Loading
+            try {
+                val listaPerfiles = repository.getAllPerfiles()
+                val match = listaPerfiles.firstOrNull {
+                    it.email.equals(email, ignoreCase = true) &&
+                            it.contrasena == contrasena
+                }
+                if (match != null) {
+                    // GUARDAR ID EN SHARED PREFERENCES
+                    val sharedPref = context.getSharedPreferences("UsuarioPrefs", Context.MODE_PRIVATE)
+                    with(sharedPref.edit()) {
+                        putLong("userId", match.id)
+                        apply()
+                    }
+
+                    _loginState.value = LoginState.Success(match)
+                } else {
+                    _loginState.value = LoginState.Error("Credenciales incorrectas")
+                }
+            } catch (e: Exception) {
+                _loginState.value = LoginState.Error("Error al conectar con el servidor")
+                _errorMessage.value = e.message ?: e.toString()
+                Log.d(TAG,e.message.toString())
             }
-            throw IllegalArgumentException("Unknown ViewModel class")
+        }
+    }
+
+    /**
+     * Factory para instanciar este ViewModel sin Hilt.
+     * Simplemente recibe el repositorio.
+     */
+    class Factory(private val repo: PerfilRepository, private val usuarioId: Long?) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return PerfilViewModel(repo, usuarioId) as T
         }
     }
 }

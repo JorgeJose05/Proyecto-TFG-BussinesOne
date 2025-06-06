@@ -38,4 +38,7 @@ interface ApiService {
 
     @GET("Perfil/GET/{id}")
     suspend fun getPerfil(@Path("id") id: Long): PerfilDto
+
+    @GET("Perfil/GET")
+    suspend fun obtenerTodosLosPerfiles(): Response<List<PerfilDto>>
 }

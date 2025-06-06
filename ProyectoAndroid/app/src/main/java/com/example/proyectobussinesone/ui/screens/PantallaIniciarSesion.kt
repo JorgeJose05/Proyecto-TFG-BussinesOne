@@ -20,21 +20,48 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.proyectobussinesone.MainActivity
 import com.example.proyectobussinesone.R
+import com.example.proyectobussinesone.RetrofitClient
+import com.example.proyectobussinesone.navigation.PerfilRepository
 import com.example.proyectobussinesone.ui.theme.ProyectoBussinesOneTheme
+import com.example.proyectobussinesone.ui.viewmodel.PerfilViewModel
 
 @Composable
 fun PantallaIniciarSesion(navController: NavHostController) {
     val interactionSourceForgetPasword = remember { MutableInteractionSource() }
     val interactionSourceRegister = remember { MutableInteractionSource() }
+
+    var emailInput by remember { mutableStateOf("") }
+    var passwordInput by remember { mutableStateOf("") }
+    var loginAttempted by remember { mutableStateOf(false) }
+    val userId = MainActivity.UsuarioSesion.getUserId(LocalContext.current)
+
+
+    // Creamos repositorio y ViewModel (sin Hilt)
+    val repository = remember { PerfilRepository(RetrofitClient.moduloApiService) }
+    val factory = remember { PerfilViewModel.Factory(repository, usuarioId = userId) }
+    val vm: PerfilViewModel = viewModel(
+        viewModelStoreOwner = LocalViewModelStoreOwner.current!!,
+        factory = factory
+    )
+
+    // Observamos los estados desde el ViewModel
+    val loginState by vm.loginState.collectAsState()
+    val errorMsg by vm.errorMessage.collectAsState()
+    val context = LocalContext.current;
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
@@ -50,22 +77,36 @@ fun PantallaIniciarSesion(navController: NavHostController) {
             )
         }
 
-        LabeleInput("Usuario", "Correo electronico")
-        LabeleInput("Contraseña","Contraseña")
-
+        LabeledInput(
+            label = "Usuario",
+            placeholder = "Correo electrónico",
+            value = emailInput,
+            onValueChange = { emailInput = it }
+        )
+        // Input para contraseña
+        LabeledInput(
+            label = "Contraseña",
+            placeholder = "Contraseña",
+            value = passwordInput,
+            onValueChange = { passwordInput = it },
+            isPassword = true
+        )
 
         Button(
-            onClick = { navController.navigate("landing_page") },
+            onClick = {
+                loginAttempted = true
+                vm.login(context, emailInput.trim(), passwordInput.trim())
+            },
             modifier = Modifier
                 .width(210.dp)
                 .height(74.dp),
-
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color(0xFF81D4FA)
             )
         ) {
-            Text("Iniciar sesion", color = Color.White,style = MaterialTheme.typography.h5 )
+            Text("Iniciar sesión", color = Color.White, style = MaterialTheme.typography.h5)
         }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -91,9 +132,72 @@ fun PantallaIniciarSesion(navController: NavHostController) {
                     .padding(start = 8.dp)
             )
         }
+        // Mostramos indicador de carga o error, o navegamos si ya llegó el perfil
+        if (loginAttempted) {
+            when (loginState) {
+                PerfilViewModel.LoginState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        androidx.compose.material.CircularProgressIndicator()
+                    }
+                }
+                is PerfilViewModel.LoginState.Success -> {
+                    // Si coincide email y contraseña, navegamos
+                    LaunchedEffect(loginState) {
+                        navController.navigate("landing_page")
+                    }
+                }
+                is PerfilViewModel.LoginState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = (loginState as PerfilViewModel.LoginState.Error).message,
+                            color = Color.Red
+                        )
+                    }
+                }
+                else -> { /* no hace nada */ }
+            }
+        }
     }
 }
 
+@Composable
+fun LabeledInput(
+    label: String,
+    placeholder: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    isPassword: Boolean = false
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(label, style = MaterialTheme.typography.h6)
+
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(placeholder) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.Black,
+                focusedLabelColor = Color.Black,
+                cursorColor = Color.Black,
+                textColor = Color.Black
+            ),
+            visualTransformation = if (isPassword) androidx.compose.ui.text.input.PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None
+        )
+    }
+}
 @Composable
 fun LabeleInput(label : String, placeholder: String ){
     var texto by remember { mutableStateOf("") }
