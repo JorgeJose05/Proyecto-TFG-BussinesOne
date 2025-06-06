@@ -1,8 +1,11 @@
 package com.example.proyectobussinesone
 
+import com.example.proyectobussinesone.ComponenteKotlinPrueba.models.Fichaje
+import com.example.proyectobussinesone.ComponenteKotlinPrueba.models.FichajePostRequestDto
 import com.example.proyectobussinesone.ComponenteProductos.models.FacturaPostRequestDto
 import com.example.proyectobussinesone.ComponenteProductos.models.Product
 import com.example.proyectobussinesone.ComponenteProductos.models.ProductoPostRequestDto
+import com.example.proyectobussinesone.navigation.models.PerfilDto
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
@@ -25,4 +28,14 @@ interface ApiService {
 
     @GET("Producto/GET/{id}")
     fun getProductoPorId(@Path("id") id: String): Call<Product>
+
+    @GET("Fichaje/GET")
+    suspend fun obtenerTodosLosFichajes(): Response<List<Fichaje>>
+
+    @POST("Fichaje/POST")
+    suspend fun crearFichaje(@Body dto: FichajePostRequestDto): Fichaje
+
+
+    @GET("Perfil/GET/{id}")
+    suspend fun getPerfil(@Path("id") id: Long): PerfilDto
 }

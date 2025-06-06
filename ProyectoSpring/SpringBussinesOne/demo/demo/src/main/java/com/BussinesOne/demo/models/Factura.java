@@ -44,7 +44,7 @@ public class Factura {
     private Perfil usuario;
 
     @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JsonBackReference
+    @JsonManagedReference
     private List<FacturaProducto> items = new ArrayList<>();
     
 }

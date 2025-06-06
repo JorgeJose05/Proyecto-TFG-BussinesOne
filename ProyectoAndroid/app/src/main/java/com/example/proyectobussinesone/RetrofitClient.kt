@@ -5,7 +5,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "http://bussinesone.us-east-1.elasticbeanstalk.com:8080/"
+    private const val BASE_URL = "http://businesone.us-east-1.elasticbeanstalk.com:8080/"
 
     @JvmStatic
     val moduloApiService: ApiService by lazy {
@@ -15,4 +15,5 @@ object RetrofitClient {
             .build()
             .create(ApiService::class.java)
     }
+
 }

@@ -1,5 +1,6 @@
 package com.example.proyectobussinesone.ComponenteKotlinPrueba
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -122,16 +123,12 @@ fun DetalleDiaScreen(
             AjusteDialog(
                 inputInTime = inputInTime,
                 onInTimeChange = { inputInTime = it },
+                viewModel = viewModel,
+                fecha           = fecha,
                 inputOutTime = inputOutTime,
                 onOutTimeChange = { inputOutTime = it },
                 onSave = { inT, outT ->
-                    /*
-                    val inT = inputInTime.takeIf { it.isNotBlank() }
-                        ?.let(LocalTime::parse)
-                        ?: fecha.atStartOfDay().toLocalTime()
-                    val outT = inputOutTime.takeIf { it.isNotBlank() }
-                        ?.let(LocalTime::parse)
-                    */
+
                     viewModel.addTimeEntry(
                         TimeEntry(fecha, inT, outT, isRealTime = false)
                     )
@@ -210,6 +207,8 @@ private fun DetalleHorasDelDia(
 
 @Composable
 private fun AjusteDialog(
+    viewModel: TimeTrackerViewModel, // <-- AÑADIR ESTO
+    fecha: LocalDate,                // <-- AÑADIR ESTO
     inputInTime: String,
     onInTimeChange: (String) -> Unit,
     inputOutTime: String,
@@ -258,6 +257,20 @@ private fun AjusteDialog(
                     null
                 }
 
+                val empleadoId = 2L // <-- reemplaza por el ID real del empleado
+
+                viewModel.crearFichaje(
+                    empleadoId  = empleadoId,
+                    fecha       = fecha,
+                    horaEntrada = inT,
+                    horaSalida  = outT,
+                    tiempoReal  = false // porque es ajuste manual
+                ) { exito ->
+                    if (!exito) {
+                        Log.e("DetalleDiaScreen", "❌ Error al crear fichaje")
+                    }
+                }
+
                 onSave(inT, outT)
             }) {
                 Text("Guardar")
@@ -270,11 +283,14 @@ private fun AjusteDialog(
         },
         title = { Text("Ajuste de fichaje") },
         text = {
+
             Column {
+                Text("Introduce solo la hora de entrada y salida.")
+                Spacer(Modifier.height(8.dp))
                 TextField(
                     value = inputInTime,
                     onValueChange = onInTimeChange,
-                    label = { Text("Hora Entrada (HH:mm)") },
+                    label = { Text("Hora Entrada (HH)") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
@@ -282,7 +298,7 @@ private fun AjusteDialog(
                 TextField(
                     value = inputOutTime,
                     onValueChange = onOutTimeChange,
-                    label = { Text("Hora Salida (HH:mm)") },
+                    label = { Text("Hora Salida (HH)") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )

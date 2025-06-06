@@ -26,6 +26,6 @@ fun LandingPage(navController: NavHostController) {
 fun AppNavHost(navController: NavHostController) {
     NavHost(navController, startDestination = Screen.Home.route) {
         composable(Screen.Home.route) { ModulosScreen() }
-        composable(Screen.Profile.route) { ProfileScreen() }
+        composable(Screen.Profile.route) { ProfileScreen(usuarioId = 2L) }
     }
 }

@@ -29,6 +29,11 @@ public class SharedViewModel extends ViewModel {
     public SharedViewModel() {
         // Mock: pre-poblamos con 4 productos de ejemplo
         List<Product> initial = new ArrayList<>();
+
+        Product movil = new Product("1", "Smartphone Galaxy A54",  349.99,"12", 2, 1);
+
+
+        initial.add(movil);
         
         products.setValue(initial);
     }

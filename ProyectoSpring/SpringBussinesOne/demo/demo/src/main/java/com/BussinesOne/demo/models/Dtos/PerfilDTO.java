@@ -1,5 +1,6 @@
 package com.BussinesOne.demo.models.Dtos;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import lombok.Data;
@@ -14,6 +15,13 @@ public class PerfilDTO {
     private String infoPersonal;
     private String formacionAcademica;
     private String datosPersonales;
+
+    private String contrasena;
+    private String telefono;
+    private String dni;
+    private LocalDate fechaNacimiento;
+    private String numeroSeguridadSocial;
+    private String iban;
 
     private List<ProductoSinUsuarioDTO> productos;
 

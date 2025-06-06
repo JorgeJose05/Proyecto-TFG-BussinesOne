@@ -43,10 +43,16 @@ public class ProductoMapper {
         producto.setNombre(dto.getNombre());
         producto.setPrecio(dto.getPrecio());
         producto.setFoto(dto.getFoto());
-        // asignamos referencia al perfil por su ID
-        Perfil perfil = new Perfil();
-        perfil.setId(dto.getUsuarioCreadorId());
-        producto.setUsuarioCreador(perfil);
+        
+        // Crear perfil solo con el ID para referencia, sin más datos
+        if (dto.getUsuarioCreadorId() != null) {
+            Perfil perfil = new Perfil();
+            perfil.setId(dto.getUsuarioCreadorId());
+            producto.setUsuarioCreador(perfil);
+        } else {
+            producto.setUsuarioCreador(null);
+        }
+
         return producto;
     }
 }

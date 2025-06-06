@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.BussinesOne.demo.mappers.FacturaRequestMapper;
 import com.BussinesOne.demo.models.Factura;
 import com.BussinesOne.demo.models.FacturaProducto;
 import com.BussinesOne.demo.models.Perfil;
@@ -58,34 +59,25 @@ public class FacturaRestController {
         Perfil usuario = perfilRepo.findById(dto.getUsuarioId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        Factura factura = new Factura();
-        factura.setPrecioTotal(dto.getPrecioTotal());
-        factura.setFecha(dto.getFecha());
-        factura.setUsuario(usuario);
-
-        // Convertir items
-        List<FacturaProducto> detalles = dto.getItems().stream().map(itemDto -> {
-            Producto prod = productoRepo.findById(itemDto.getProductoId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado"));
-            FacturaProducto fp = new FacturaProducto();
-            fp.setFactura(factura);
-            fp.setProducto(prod);
-            fp.setCantidad(itemDto.getCantidad());
-            fp.setPrecioUnitario(itemDto.getPrecioUnitario());
-            fp.setPrecioSubtotal(itemDto.getPrecioUnitario() * itemDto.getCantidad());
-            return fp;
-        }).collect(Collectors.toList());
-
-        factura.setItems(detalles);
-        Factura saved = facturaRepo.save(factura);
-        Factura fullyLoaded = facturaRepo.findById(saved.getFacturaId())
-        .orElseThrow(() -> 
-            new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error recargando factura")
+        Factura facturaParaGuardar = FacturaRequestMapper.toEntity(
+            dto,
+            // Esta función se encarga de buscar cada Producto en la BD
+            (Long productoId) -> productoRepo.findById(productoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado con ID " + productoId))
         );
 
-    return ResponseEntity
-        .status(HttpStatus.CREATED)
-        .body(fullyLoaded);
+        facturaParaGuardar.setUsuario(usuario);
+
+        Factura saved = facturaRepo.save(facturaParaGuardar);
+
+        Factura fullyLoaded = facturaRepo.findById(saved.getFacturaId())
+                .orElseThrow(() ->
+                    new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error recargando factura")
+                );
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(fullyLoaded);
 
     }
 

@@ -37,110 +37,256 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
-/*
-*  Añadir :
-*   Formacion academica y certificaciones
-*   Datos personales como.
-*       DNI
-*       Fecha de nacimiento
-*       Numero de seguridad social
-*       Informacion bancaria
-*       Curriculum vitae
-*
-*
-* */
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.proyectobussinesone.RetrofitClient
+
 @Composable
-fun AcademicSection() {
+fun AcademicSection(
+    initialFormacion: String,
+    onFormacionChange: (String) -> Unit
+) {
     SectionTitle("Formación Académica y Certificaciones")
+
+    var formacion by remember { mutableStateOf(initialFormacion) }
+    var isEditing by remember { mutableStateOf(initialFormacion.isBlank()) }
+
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text("• Grado en Ingeniería Informática - Universidad de Valencia (2015-2019)")
-        Text("• Máster en Gestión de Proyectos - Universidad Politécnica de Valencia (2020-2021)")
-        Text("• Certificación PMP - Project Management Institute (2022)")
-        Text("• Curso de Kotlin Avanzado - Udemy (2023)")
+        if (isEditing) {
+            OutlinedTextField(
+                value = formacion,
+                onValueChange = {
+                    formacion = it
+                    onFormacionChange(it)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 120.dp),
+                placeholder = { Text("Introduce tu formación académica") },
+                singleLine = false,
+                maxLines = 5
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                IconButton(onClick = { isEditing = false }) {
+                    Icon(Icons.Default.Check, contentDescription = "Guardar formación")
+                }
+            }
+        } else {
+            Text(
+                text = if (formacion.isBlank()) "Sin información" else formacion,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+            IconButton(onClick = { isEditing = true }) {
+                Icon(Icons.Default.Edit, contentDescription = "Editar formación")
+            }
+        }
     }
+
     Spacer(modifier = Modifier.height(24.dp))
 }
+
+@Composable
+fun EditableAcademicItem(
+    initialValue: String,
+    onValueSaved: (String) -> Unit,
+    onDelete: () -> Unit
+) {
+    var isEditing by remember { mutableStateOf(initialValue.isBlank()) }
+    var text by remember { mutableStateOf(initialValue) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (isEditing) {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                modifier = Modifier.weight(1f),
+                placeholder = { Text("Introduce formación académica") },
+                singleLine = false
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(onClick = {
+                isEditing = false
+                onValueSaved(text)
+            }) {
+                Icon(Icons.Default.Check, contentDescription = "Guardar")
+            }
+        } else {
+            Text(
+                text = if (text.isBlank()) "Sin información" else "• $text",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(onClick = { isEditing = true }) {
+                Icon(Icons.Default.Edit, contentDescription = "Editar")
+            }
+            IconButton(onClick = { onDelete() }) {
+                Icon(Icons.Default.Delete, contentDescription = "Eliminar")
+            }
+        }
+    }
+}
+
+
 @Composable
 fun PersonalDataSection() {
     SectionTitle("Datos Personales")
+
+
+    var dni by remember { mutableStateOf<String?>(null) }
+    var nacimiento by remember { mutableStateOf<String?>(null) }
+    var ss by remember { mutableStateOf<String?>(null) }
+    var iban by remember { mutableStateOf<String?>(null) }
+
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        InfoRow(icon = Icons.Default.Badge, label = "DNI", value = "12345678A")
-        InfoRow(icon = Icons.Default.Cake, label = "Fecha de Nacimiento", value = "15 de marzo de 1990")
-        InfoRow(icon = Icons.Default.Security, label = "Nº Seguridad Social", value = "12/34567890/12")
-        InfoRow(icon = Icons.Default.AccountBalance, label = "IBAN", value = "ES12 3456 7890 1234 5678 9012")
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = { /* Lógica para abrir el currículum vitae */ },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(imageVector = Icons.Default.Description, contentDescription = "Currículum Vitae")
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Ver Currículum Vitae")
-        }
+        EditableInfoRow(
+            icon = Icons.Default.Badge,
+            label = "DNI",
+            value = dni,
+            onValueChange = { dni = it }
+        )
+        EditableInfoRow(
+            icon = Icons.Default.Cake,
+            label = "Fecha de Nacimiento",
+            value = nacimiento,
+            onValueChange = { nacimiento = it }
+        )
+        EditableInfoRow(
+            icon = Icons.Default.Security,
+            label = "Nº Seguridad Social",
+            value = ss,
+            onValueChange = { ss = it }
+        )
+        EditableInfoRow(
+            icon = Icons.Default.AccountBalance,
+            label = "IBAN",
+            value = iban,
+            onValueChange = { iban = it }
+        )
     }
+
     Spacer(modifier = Modifier.height(24.dp))
 }
 
 @Composable
-fun ProfileScreen() {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        // --- Header de perfil ---
-        item {
-            Spacer(modifier = Modifier.height(24.dp))
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+fun ProfileScreen(usuarioId: Long) {
+    // Necesitamos un ViewModelProvider.Factory
+    val repository = remember { PerfilRepository(RetrofitClient.moduloApiService) }
+    val factory = remember { PerfilViewModel.Factory(repository, usuarioId) }
+
+    // Usamos viewModel(factory = ...) para crear/recuperar el ViewModel
+    val vm: PerfilViewModel = viewModel(
+        viewModelStoreOwner = LocalViewModelStoreOwner.current!!,
+        factory = factory
+    )
+
+    // Observamos el estado
+    val perfil by vm.perfilState.collectAsState()
+    val errorMsg by vm.error.collectAsState()
+
+    // Mostramos mientras carga o error
+    when {
+        perfil == null && errorMsg == null -> {
+            // Cargando
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "Foto de perfil",
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Juan Pérez", style = MaterialTheme.typography.headlineSmall)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text("Rol", style = MaterialTheme.typography.headlineSmall, color = Color.Gray)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text("juan.perez@example.com", color = Color.LightGray)
-                Spacer(modifier = Modifier.height(24.dp))
+                CircularProgressIndicator()
             }
         }
-
-        // --- Sección Contacto ---
-        item {
-            SectionTitle("Contacto")
-            InfoRow(icon = Icons.Default.Phone, label = "Teléfono", value = "+34 600 123 456")
-            InfoRow(icon = Icons.Default.Email, label = "Email", value = "juan.perez@example.com")
-            InfoRow(icon = Icons.Default.Home, label = "Dirección", value = "Calle Falsa 123, Madrid")
-            Spacer(modifier = Modifier.height(24.dp))
+        perfil == null && errorMsg != null -> {
+            // Mostrar mensaje de error
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = errorMsg ?: "Error desconocido", color = Color.Red)
+            }
         }
+        else -> {
+            // Ya tenemos datos de perfil: perfil != null
+            val datos = perfil!!
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.logo),
+                            contentDescription = "Foto de perfil",
+                            modifier = Modifier
+                                .size(120.dp)
+                                .clip(CircleShape)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(text = datos.nombre, style = MaterialTheme.typography.headlineSmall)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(text = datos.email, color = Color.Gray)
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+                }
 
-        // --- Sección Sobre mí ---
-        item {
-            SectionTitle("Sobre mí")
-            Text(
-                text = "Desarrollador Android con 5 años de experiencia en Jetpack Compose y arquitectura MVVM. "
-                        + "Apasionado por la usabilidad y el buen diseño de interfaces, además de mejorar continuamente "
-                        + "mis habilidades en Kotlin y modernas prácticas de testing.",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(24.dp))
+                item {
+                    SectionTitle("Contacto")
+                    EditableInfoRow(Icons.Default.Phone, "Teléfono", datos.telefono ?: "") { /*no-edit*/ }
+                    EditableInfoRow(Icons.Default.Email, "Email", datos.email) { /*no-edit*/ }
+                    EditableInfoRow(Icons.Default.Home, "Dirección", datos.direccion ?: "") { /*no-edit*/ }
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                item {
+                    SectionTitle("Datos Personales")
+                    EditableInfoRow(Icons.Default.Badge, "DNI", datos.dni ?: "") { /*no-edit*/ }
+                    EditableInfoRow(Icons.Default.Cake, "Fecha de Nacimiento", datos.fechaNacimiento ?: "") { /*no-edit*/ }
+                    EditableInfoRow(Icons.Default.Security, "Nº Seguridad Social", datos.numeroSeguridadSocial ?: "") { /*no-edit*/ }
+                    EditableInfoRow(Icons.Default.AccountBalance, "IBAN", datos.iban ?: "") { /*no-edit*/ }
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                item {
+                    AcademicSection(
+                        initialFormacion = datos.formacionAcademica ?: "",
+                        onFormacionChange = { nueva ->
+
+                        }
+                    )
+                }
+
+                item {
+                    SectionTitle("Sobre mí")
+                    Text(
+                        text = datos.datosPersonales ?: "Sin descripción",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+            }
         }
-    //secciones extra mias
-        item { AcademicSection() }
-        item { PersonalDataSection() }
-
-
     }
 }
+
 
 @Composable
 private fun SectionTitle(title: String) {
@@ -155,7 +301,15 @@ private fun SectionTitle(title: String) {
 }
 
 @Composable
-private fun InfoRow(icon: ImageVector, label: String, value: String) {
+private fun EditableInfoRow(
+    icon: ImageVector,
+    label: String,
+    value: String?,
+    onValueChange: (String) -> Unit
+) {
+    var isEditing by remember { mutableStateOf(false) }
+    var text by remember { mutableStateOf(value ?: "") }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -166,7 +320,32 @@ private fun InfoRow(icon: ImageVector, label: String, value: String) {
         Spacer(modifier = Modifier.width(12.dp))
         Text("$label:", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         Spacer(modifier = Modifier.width(8.dp))
-        Text(value, style = MaterialTheme.typography.bodyMedium)
+
+        if (isEditing) {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                modifier = Modifier.weight(1f),
+                singleLine = true
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            IconButton(onClick = {
+                isEditing = false
+                onValueChange(text) // Guardar valor
+            }) {
+                Icon(Icons.Default.Check, contentDescription = "Guardar")
+            }
+        } else {
+            Text(
+                text = if (text.isBlank()) "Sin información" else text,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f),
+                overflow = TextOverflow.Ellipsis
+            )
+            IconButton(onClick = { isEditing = true }) {
+                Icon(Icons.Default.Edit, contentDescription = "Editar")
+            }
+        }
     }
 }
 
@@ -174,6 +353,6 @@ private fun InfoRow(icon: ImageVector, label: String, value: String) {
 @Composable
 fun PreviewProfileScreen(){
     ProyectoBussinesOneTheme {
-        ProfileScreen()
+        ProfileScreen(usuarioId = 2L)
     }
 }

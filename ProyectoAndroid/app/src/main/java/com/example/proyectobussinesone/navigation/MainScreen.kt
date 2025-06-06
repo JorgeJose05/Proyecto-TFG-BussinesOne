@@ -81,7 +81,7 @@ fun MainScreen(navController : NavHostController) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route)     { ModulosScreen() }
-            composable(Screen.Profile.route)  { ProfileScreen() }
+            composable(Screen.Profile.route)  { ProfileScreen(usuarioId = 2L) }
         }
     }
 }

@@ -1,6 +1,8 @@
 package com.example.proyectobussinesone.ComponenteKotlinPrueba
 
+import android.content.ContentValues.TAG
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -44,7 +46,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
 import com.example.proyectobussinesone.ui.theme.ProyectoBussinesOneTheme
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-
+import com.example.proyectobussinesone.ComponenteKotlinPrueba.models.Fichaje
+import com.example.proyectobussinesone.ComponenteKotlinPrueba.models.FichajePostRequestDto
+import com.example.proyectobussinesone.RetrofitClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 
 private val Context.dataStore by preferencesDataStore("time_prefs")
@@ -107,21 +113,108 @@ class TimeTrackerViewModel(private val context: Context) : ViewModel() {
 
     fun loadMonthEntries(month: YearMonth) {
         viewModelScope.launch {
-            // TODO: reemplazar por llamada real a BD
-            val fake = listOf(
-                TimeEntry(month.atDay(2), LocalTime.of(9,0), LocalTime.of(17,0),true),
-                TimeEntry(month.atDay(5), LocalTime.of(8,30), LocalTime.of(15,45),true),
-                TimeEntry(month.atDay(6), LocalTime.of(2,30), LocalTime.of(22,45),true),
-                TimeEntry(month.atDay(5), LocalTime.of(16,0), null,true), // aún trabajando
-                TimeEntry(month.atDay(12), LocalTime.of(10,0), LocalTime.of(14,0),true)
-            )
-            _entries.value = fake
+            Log.d("TimeTrackerVM", "▶ loadMonthEntries: mes = $month")
+            _entries.value = emptyList()
+
+            try {
+                // 2. Llamamos al endpoint que devuelve Response<List<FichajeDto>>
+                Log.d("TimeTrackerVM", "   ➡️ Llamando a /Fichaje/GET desde TimeTrackerViewModel…")
+                val response = RetrofitClient.moduloApiService.obtenerTodosLosFichajes()
+                Log.d("TimeTrackerVM", "   🔔 HTTP code: ${response.code()} / mensaje: ${response.message()}")
+
+                if (response.isSuccessful) {
+                    // 3. Sacamos el body (lista de FichajeDto). Si es null, usamos lista vacía.
+                    val todosLosFichajes: List<Fichaje> = response.body() ?: emptyList()
+                    Log.d("TimeTrackerVM", "   📥 recibidos total = ${todosLosFichajes.size} fichajes")
+
+                    // 4. Filtramos los fichajes que pertenezcan exactamente al mes/año que nos pasan
+                    val fichajesDelMes = todosLosFichajes.filter { f ->
+                        val fechaLocal = LocalDate.parse(f.fecha)  // p. ej. "2025-06-01" → LocalDate(2025,6,1)
+                        (fechaLocal.year == month.year && fechaLocal.month == month.month)
+                    }
+                    Log.d("TimeTrackerVM", "   🔎 Fichajes de $month → ${fichajesDelMes.size}")
+
+                    // 5. Convertimos cada FichajeDto a TimeEntry
+                    val listaEntradas = fichajesDelMes.map { f ->
+                        val fechaLocal = LocalDate.parse(f.fecha)
+                        val inTimeLocal = LocalTime.parse(f.horaEntrada)           // e.g. "08:30:00"
+                        val outTimeLocal = f.horaSalida?.let { LocalTime.parse(it) } // si no es null, parsea "17:00:00"
+                        TimeEntry(
+                            date      = fechaLocal,
+                            inTime    = inTimeLocal,
+                            outTime   = outTimeLocal,
+                            isRealTime = f.tiempoReal
+                        )
+                    }
+                    Log.d("TimeTrackerVM", "   ✔ Conversión a TimeEntry: tamaño = ${listaEntradas.size}")
+
+                    // 6. Asignamos al MutableStateFlow para que la UI Compose lo observe
+                    _entries.value = listaEntradas
+
+                } else {
+                    // Si la respuesta HTTP no es 2xx, dejamos la lista vacía o podrías manejar un error
+                    Log.e("TimeTrackerVM", "   ❌ Respuesta no exitosa en TimeTracker: ${response.code()} / ${response.message()}")
+                    _entries.value = emptyList()
+                }
+            } catch (e: Exception) {
+                // Si hubo excepción (p. ej. sin conexión), también dejamos vacía la lista
+                e.printStackTrace()
+                Log.e("TimeTrackerVM", "   ⚠️ Excepción en loadMonthEntries: ${e.localizedMessage}", e)
+                _entries.value = emptyList()
+            }
         }
     }
 
     // Filtra entradas de un día concreto
     fun entriesForDay(day: LocalDate): List<TimeEntry> =
         entries.value.filter { it.date == day }
+
+    fun crearFichaje(
+        empleadoId: Long,
+        fecha: LocalDate,
+        horaEntrada: LocalTime,
+        horaSalida: LocalTime?,
+        tiempoReal: Boolean = true,
+        onResult: (Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                // 1) Formar el DTO con strings en formato ISO: "yyyy-MM-dd", "HH:mm:ss"
+                val dto = FichajePostRequestDto(
+                    empleadoId  = empleadoId,
+                    fecha       = fecha.toString(),             // ex: "2025-06-12"
+                    horaEntrada = horaEntrada.toString(),       // ex: "08:30:00"
+                    horaSalida  = horaSalida?.toString(),       // ex: "17:00:00" o null
+                    tiempoReal  = tiempoReal
+                )
+
+                // 2) Ejecutar el POST en IO
+                try {
+                    val nuevoFichaje: Fichaje = withContext(Dispatchers.IO) {
+                        RetrofitClient.moduloApiService.crearFichaje(dto)
+                    }
+                    // Éxito
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error al crear fichaje: ${e.message}")
+                    // Mostrar error o manejar fallo
+                }
+
+
+                Log.d(TAG, "POST exitoso, fichajeID")
+
+
+                val currentMonth = YearMonth.from(fecha)
+                loadMonthEntries(currentMonth)
+
+
+
+                onResult(true)
+            } catch (e: Exception) {
+                Log.e(TAG, "⚠️ Error al crear fichaje (POST): ${e.localizedMessage}", e)
+                onResult(false)
+            }
+        }
+    }
 }
 
 @Composable
@@ -164,6 +257,7 @@ fun CustomCalendar(
     maxHours: Float
 ) {
     LaunchedEffect(currentMonth) {
+        Log.d("Calendario", "▶ LaunchedEffect disparado: currentMonth = $currentMonth")
         viewModel.loadMonthEntries(currentMonth)
     }
 

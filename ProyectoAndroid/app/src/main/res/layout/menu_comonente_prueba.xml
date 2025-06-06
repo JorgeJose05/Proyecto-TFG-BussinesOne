@@ -26,16 +26,32 @@
         android:gravity="center">
 
         <Button
+            android:id="@+id/buttonProductos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:text="Ver Productos" />
+
+        <Button
             android:id="@+id/buttonCreate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
             android:text="Crear producto" />
 
         <Button
             android:id="@+id/buttonScan"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
             android:text="Scanear código" />
+
+        <Button
+            android:id="@+id/buttonFacturas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:text="Ver facturas" />
 
     </LinearLayout>
 

@@ -75,24 +75,16 @@ fun ModulosScreen() {
                 )
                 Divider()
                 NavigationDrawerItem(
-                    label    = { Text("modulo1") },
-                    icon     = { Icon(Icons.Default.Apps, contentDescription = null) },
-                    selected = false,
-                    onClick  = {
-                        scope.launch { drawerState.close() }
-                        navController.navigate("modulo1") }
-                )
-                NavigationDrawerItem(
-                    label    = { Text("modulo2") },
-                    icon     = { Icon(Icons.Default.Apps, contentDescription = null) },
+                    label    = { Text("Punto de venta") },
+                    icon     = { Icon(Icons.Default.ShoppingCart, contentDescription = null) },
                     selected = false,
                     onClick  = {
                         scope.launch { drawerState.close() }
                         navController.navigate("modulo2") }
                 )
                 NavigationDrawerItem(
-                    label    = { Text("modulo3") },
-                    icon     = { Icon(Icons.Default.Apps, contentDescription = null) },
+                    label    = { Text("Fichaje") },
+                    icon     = { Icon(Icons.Default.Receipt, contentDescription = null) },
                     selected = false,
                     onClick  = {
                         scope.launch { drawerState.close() }

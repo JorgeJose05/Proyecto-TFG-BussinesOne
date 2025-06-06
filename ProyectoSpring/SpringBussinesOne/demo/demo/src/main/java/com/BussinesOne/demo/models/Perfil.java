@@ -39,14 +39,32 @@ public class Perfil {
     @Column(columnDefinition = "TEXT")
     private String direccion;
 
-    @Column(name = "infopersonal" ,columnDefinition = "TEXT")
+    @Column(name = "infopersonal", columnDefinition = "TEXT")
     private String infoPersonal;
 
-    @Column(name = "formacionacademica" ,columnDefinition = "TEXT")
+    @Column(name = "formacionacademica", columnDefinition = "TEXT")
     private String formacionAcademica;
 
-    @Column(name = "datospersonales" ,columnDefinition = "TEXT")
+    @Column(name = "datospersonales", columnDefinition = "TEXT")
     private String datosPersonales;
+
+    @Column(name = "contrasena", columnDefinition = "TEXT")
+    private String contrasena;
+
+    @Column(name = "telefono", length = 20)
+    private String telefono;
+
+    @Column(name = "dni", length = 20)
+    private String dni;
+
+    @Column(name = "fechanacimiento")
+    private LocalDate fechaNacimiento;
+
+    @Column(name = "numeroseguridadsocial", length = 30)
+    private String numeroSeguridadSocial;
+
+    @Column(name = "iban" , length = 34)
+    private String iban;
 
     @OneToMany(mappedBy = "usuarioCreador", cascade = CascadeType.ALL)
     @JsonBackReference
@@ -60,13 +78,3 @@ public class Perfil {
     @JsonBackReference
     private List<Fichaje> fichajes;
 }
-/*CREATE TABLE Perfil (
-    Id SERIAL PRIMARY KEY,
-    Nombre VARCHAR(100) NOT NULL,
-    Rol VARCHAR(50),
-    Email VARCHAR(100) UNIQUE,
-    Direccion TEXT,
-    InfoPersonal TEXT,
-    FormacionAcademica TEXT,
-    DatosPersonales TEXT
-); */

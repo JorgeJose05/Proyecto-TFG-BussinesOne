@@ -30,6 +30,16 @@ public class PerfilMapper {
         dto.setInfoPersonal(perfil.getInfoPersonal());
         dto.setFormacionAcademica(perfil.getFormacionAcademica());
         dto.setDatosPersonales(perfil.getDatosPersonales());
+
+        
+        // Nuevos campos
+        dto.setContrasena(perfil.getContrasena());
+        dto.setTelefono(perfil.getTelefono());
+        dto.setDni(perfil.getDni());
+        dto.setFechaNacimiento(perfil.getFechaNacimiento());
+        dto.setNumeroSeguridadSocial(perfil.getNumeroSeguridadSocial());
+        dto.setIban(perfil.getIban());
+
         // Si decidiste incluir productos en el PerfilDTO:
         if (perfil.getProductos() != null) {
             dto.setProductos(
@@ -58,6 +68,14 @@ public class PerfilMapper {
         perfil.setInfoPersonal(dto.getInfoPersonal());
         perfil.setFormacionAcademica(dto.getFormacionAcademica());
         perfil.setDatosPersonales(dto.getDatosPersonales());
+
+        // Nuevos campos
+        perfil.setTelefono(dto.getTelefono());
+        perfil.setDni(dto.getDni());
+        perfil.setFechaNacimiento(dto.getFechaNacimiento());
+        perfil.setNumeroSeguridadSocial(dto.getNumeroSeguridadSocial());
+        perfil.setIban(dto.getIban());
+
         return perfil;
     }
 }
