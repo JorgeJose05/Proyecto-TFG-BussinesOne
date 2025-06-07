@@ -16,7 +16,7 @@ data class Perfil(
     val id: Long,
     val nombre: String,
     val email: String,
-    val contrasena: String?,
+    val contraseña: String?,
     val telefono: String?,
     val direccion: String?,
     val formacionAcademica: String?,
@@ -70,9 +70,13 @@ class PerfilViewModel(
             _loginState.value = LoginState.Loading
             try {
                 val listaPerfiles = repository.getAllPerfiles()
+                Log.d(TAG, "LoginIntent: email='$email' | contrasena='$contrasena'")
+                listaPerfiles.forEach { perfil ->
+                    Log.d(TAG, "Perfil recibido → id=${perfil.id}, email='${perfil.email}', contrasena='${perfil.contraseña}'")
+                }
                 val match = listaPerfiles.firstOrNull {
                     it.email.equals(email, ignoreCase = true) &&
-                            it.contrasena == contrasena
+                            it.contraseña == contrasena
                 }
                 if (match != null) {
                     // GUARDAR ID EN SHARED PREFERENCES
@@ -85,6 +89,9 @@ class PerfilViewModel(
                     _loginState.value = LoginState.Success(match)
                 } else {
                     _loginState.value = LoginState.Error("Credenciales incorrectas")
+                    Log.d(TAG, "CONTRASEÑA: "+ contrasena+ " email: "+ email)
+
+
                 }
             } catch (e: Exception) {
                 _loginState.value = LoginState.Error("Error al conectar con el servidor")

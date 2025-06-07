@@ -68,6 +68,7 @@ public class PerfilMapper {
         perfil.setInfoPersonal(dto.getInfoPersonal());
         perfil.setFormacionAcademica(dto.getFormacionAcademica());
         perfil.setDatosPersonales(dto.getDatosPersonales());
+        perfil.setContrasena(dto.getContraseña());
 
         // Nuevos campos
         perfil.setTelefono(dto.getTelefono());

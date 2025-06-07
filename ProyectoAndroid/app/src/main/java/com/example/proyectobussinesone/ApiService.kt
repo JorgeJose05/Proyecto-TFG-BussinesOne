@@ -6,6 +6,7 @@ import com.example.proyectobussinesone.ComponenteProductos.models.FacturaPostReq
 import com.example.proyectobussinesone.ComponenteProductos.models.Product
 import com.example.proyectobussinesone.ComponenteProductos.models.ProductoPostRequestDto
 import com.example.proyectobussinesone.navigation.models.PerfilDto
+import com.example.proyectobussinesone.ui.screens.PerfilRequest
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
@@ -41,4 +42,7 @@ interface ApiService {
 
     @GET("Perfil/GET")
     suspend fun obtenerTodosLosPerfiles(): Response<List<PerfilDto>>
+
+    @POST("Perfil/POST")
+    suspend fun crearPerfil(@Body dto: PerfilRequest): Response<PerfilDto>
 }
