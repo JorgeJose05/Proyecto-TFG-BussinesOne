@@ -286,6 +286,9 @@ public class CrearProductoFragment extends Fragment {
         binding.editPrice.setText("");
         photoFile = null; // Reinicia el estado de la foto también
 
+        //quitar el fondo de la imagen
+        binding.barcodeImage.setBackgroundColor(Color.TRANSPARENT);
+        binding.barcodeImage.setPadding(0, 0, 0, 0);
     }
 
 

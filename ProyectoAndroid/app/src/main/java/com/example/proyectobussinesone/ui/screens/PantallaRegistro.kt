@@ -5,6 +5,7 @@ import android.content.ContentValues.TAG
 import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -80,6 +81,7 @@ fun PantallaRegistro(navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xFFf0f8ff))
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -87,6 +89,7 @@ fun PantallaRegistro(navController: NavHostController) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(Color(0xFFf0f8ff))
                 .height(200.dp), // define altura
             contentAlignment = Alignment.Center
         ) {
@@ -214,8 +217,7 @@ fun RolDropdown(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { expanded = true }
-                .padding(16.dp)
-                .border(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+
         )
 
         DropdownMenu(

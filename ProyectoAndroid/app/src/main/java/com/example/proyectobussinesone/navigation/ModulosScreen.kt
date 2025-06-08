@@ -105,8 +105,8 @@ fun ModulosScreen() {
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor    = MaterialTheme.colorScheme.primary,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary
+                        containerColor    = Color(0xFF4FC3F7),
+                        titleContentColor = Color(0xFFFFFFFF)
                     )
                 )
             }

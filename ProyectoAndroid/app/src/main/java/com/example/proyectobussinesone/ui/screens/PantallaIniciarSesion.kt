@@ -1,6 +1,7 @@
 package com.example.proyectobussinesone.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -59,6 +60,7 @@ fun PantallaIniciarSesion(navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xFFf0f8ff))
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -66,6 +68,7 @@ fun PantallaIniciarSesion(navController: NavHostController) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(Color(0xFFf0f8ff))
                 .height(200.dp), // define altura
             contentAlignment = Alignment.Center
         ) {

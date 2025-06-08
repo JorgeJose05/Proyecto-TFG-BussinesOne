@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:background="#81D4FA"
     tools:context=".ComponenteProductos.CrearProductoFragment">
 
     <!-- LinearLayout que reparte el alto en 3 partes -->
@@ -64,6 +65,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Tomar Foto"
+                android:textColor="#FFFFFF"
                 android:layout_marginBottom="8dp" />
 
             <EditText
@@ -71,8 +73,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Nombre"
-                android:textColorHint="#000000"
-                android:backgroundTint="#000000"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#2222FF"
                 android:layout_marginBottom="8dp" />
 
             <EditText
@@ -80,15 +82,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Precio (€)"
-                android:textColorHint="#000000"
-                android:backgroundTint="#000000"
                 android:inputType="numberDecimal"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#2222FF"
                 android:layout_marginBottom="8dp" />
 
             <Button
                 android:id="@+id/btnSave"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
                 android:text="Guardar" />
 
         </LinearLayout>

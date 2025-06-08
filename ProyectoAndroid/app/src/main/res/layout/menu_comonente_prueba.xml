@@ -4,6 +4,7 @@
     android:id="@+id/fragmentContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#81D4FA"
     tools:context=".ComponenteProductos.Menu">
 
     <!--
@@ -23,35 +24,39 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center">
-
-        <Button
-            android:id="@+id/buttonProductos"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:text="Ver Productos" />
+        android:gravity="center"
+        android:padding="24dp"
+        android:background="#81D4FA"
+        android:divider="#33000000"
+        android:showDividers="middle"
+        android:dividerPadding="16dp">
 
         <Button
             android:id="@+id/buttonCreate"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:text="Crear producto" />
+            android:layout_marginBottom="24dp"
+            android:paddingVertical="16dp"
+            android:text="Crear producto"
+            android:textAllCaps="false"
+            android:textSize="18sp"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#3F51B5"
+            android:elevation="4dp" />
 
         <Button
             android:id="@+id/buttonScan"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:text="Scanear código" />
-
-        <Button
-            android:id="@+id/buttonFacturas"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:text="Ver facturas" />
+            android:paddingVertical="16dp"
+            android:text="Scannear productos"
+            android:textAllCaps="false"
+            android:textSize="18sp"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#FF4081"
+            android:elevation="4dp" />
 
     </LinearLayout>
 
