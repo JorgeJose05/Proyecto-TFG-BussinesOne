@@ -32,8 +32,10 @@ public class SharedViewModel extends ViewModel {
 
         Product movil = new Product("1", "Smartphone Galaxy A54",  349.99,"12", 2, 1);
 
+        Product movil2 = new Product("2", "Smartphone Galaxy A54",  39.99,"12", 2, 1);
 
         initial.add(movil);
+        initial.add(movil2);
         
         products.setValue(initial);
     }
