@@ -24,8 +24,12 @@ interface ApiService {
         @Body producto: ProductoPostRequestDto
     ): Call<Void>
 
+
+    @GET("Producto/GET")
+    suspend fun obtenerTodosLosProductos(): Response<List<Product>>
+
     @POST("Factura/POST")
-    fun crearFacturaSimple(@Body dto: FacturaPostRequestDto): Call<Void?>
+    fun crearFacturaSimple(@Body dto: FacturaPostRequestDto): Call<FacturaPostRequestDto>
 
     @GET("Producto/GET/{id}")
     fun getProductoPorId(@Path("id") id: String): Call<Product>

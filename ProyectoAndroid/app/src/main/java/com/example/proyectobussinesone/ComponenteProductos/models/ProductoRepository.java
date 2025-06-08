@@ -2,15 +2,19 @@ package com.example.proyectobussinesone.ComponenteProductos.models;
 
 import android.util.Log;
 
+import androidx.lifecycle.MutableLiveData;
+
 import com.example.proyectobussinesone.ApiService;
 import com.example.proyectobussinesone.RetrofitClient;
 
 import java.io.IOException;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import androidx.lifecycle.LiveData;
 public class ProductoRepository {
 
     public interface ProductoCallback {
@@ -52,4 +56,6 @@ public class ProductoRepository {
             }
         });
     }
+
+
 }

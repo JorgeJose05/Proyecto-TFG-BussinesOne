@@ -25,15 +25,22 @@ public class FacturaRepository {
      */
     public void crearFacturaSimple(@NonNull FacturaPostRequestDto dto,@NonNull FacturaCallback callback) {
         ApiService api = RetrofitClient.INSTANCE.getModuloApiService();
-        Call<Void> call = api.crearFacturaSimple(dto);
+        Call<FacturaPostRequestDto> call = api.crearFacturaSimple(dto);
 
         Log.d(TAG, "crearFactura: enviando DTO -> " + dto.toString());
-        call.enqueue(new Callback<Void>() {
+        call.enqueue(new Callback<FacturaPostRequestDto>() {
             @Override
-            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+            public void onResponse(@NonNull Call<FacturaPostRequestDto> call, @NonNull Response<FacturaPostRequestDto> response) {
 
                 Log.d(TAG, "onResponse: HTTP " + response.code());
                 if (response.isSuccessful()) {
+                   FacturaPostRequestDto facturaGuardada = response.body();
+                    Log.d("FacturaPOST", "Factura creada: ID = "
+                            + ", Fecha = " + facturaGuardada.getFecha()
+                            + ", Total = " + facturaGuardada.getPrecioTotal());
+                    facturaGuardada.getItems().forEach( a -> {
+                        Log.d(TAG, "onResponse: " + a.toString());
+                    });
                     Log.d(TAG, "onResponse: Éxito (isSuccessful), body=null o vacío");
                     callback.onSuccess();
                 } else {
@@ -53,7 +60,7 @@ public class FacturaRepository {
             }
 
             @Override
-            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<FacturaPostRequestDto> call, @NonNull Throwable t) {
                 String msg = "Fallo de red: " + t.getLocalizedMessage();
                 Log.e(TAG, "onFailure: ", t);
                 callback.onError("Fallo de red: " + t.getMessage());
