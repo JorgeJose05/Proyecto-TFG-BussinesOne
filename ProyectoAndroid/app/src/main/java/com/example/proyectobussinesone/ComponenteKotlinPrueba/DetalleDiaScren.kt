@@ -37,6 +37,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.proyectobussinesone.MainActivity
@@ -168,7 +169,7 @@ private fun DetalleHorasDelDia(
                     .weight(1f)
                     .height(40.dp)
                     .background(
-                        if (hora in horasTrabajadas) MaterialTheme.colorScheme.primary
+                        if (hora in horasTrabajadas) Color(0xFF2196F3)
                         else MaterialTheme.colorScheme.surfaceVariant
                     )
             )
@@ -193,16 +194,21 @@ private fun DetalleHorasDelDia(
         Button(
             onClick = onToggleClock,
             modifier = Modifier.weight(1f),
-            enabled = isToday
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF2196F3),  // tu azul
+                contentColor   = Color.White         // color del texto
+            ),
+            enabled = isToday,
         ) {
-            Text(if (isClockedIn) "Desfichar" else "Fichar")
+            Text(if (isClockedIn) "Desfichar" else "Fichar" )
         }
         OutlinedButton(
             onClick = onShowDialog,
             modifier = Modifier.weight(1f),
             enabled = true
         ) {
-            Text("Solicitar fichaje")
+            Text("Solicitar fichaje",
+                color = Color(0xFF2196F3) )
         }
     }
 }
