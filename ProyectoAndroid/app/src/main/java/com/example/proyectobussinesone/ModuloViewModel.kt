@@ -18,11 +18,16 @@ class ModuloViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow<ModuloViewStateB>(ModuloViewStateB.Loading)
     val uiState: StateFlow<ModuloViewStateB> = _uiState
+    private val _seleccionado = MutableStateFlow<ModuloStoreItem?>(null)
+    val seleccionado: StateFlow<ModuloStoreItem?> = _seleccionado
 
     init {
         cargarModulos()
     }
 
+    fun select(modulo: ModuloStoreItem) {
+        _seleccionado.value = modulo
+    }
     private fun cargarModulos() {
         viewModelScope.launch {
             _uiState.value = ModuloViewStateB.Loading

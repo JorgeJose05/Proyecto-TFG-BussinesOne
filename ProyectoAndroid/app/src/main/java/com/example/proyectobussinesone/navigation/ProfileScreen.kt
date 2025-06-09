@@ -2,6 +2,7 @@ package com.example.proyectobussinesone.navigation
 
 
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -43,9 +44,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.proyectobussinesone.RetrofitClient
 import com.example.proyectobussinesone.ui.viewmodel.PerfilViewModel
 
@@ -188,11 +192,12 @@ fun PersonalDataSection() {
 }
 
 @Composable
-fun ProfileScreen(usuarioId: Long) {
+fun ProfileScreen(usuarioId: Long, navController: NavHostController) {
     // Necesitamos un ViewModelProvider.Factory
     val repository = remember { PerfilRepository(RetrofitClient.moduloApiService) }
     val factory = remember { PerfilViewModel.Factory(repository, usuarioId) }
 
+    val context = LocalContext.current
     // Usamos viewModel(factory = ...) para crear/recuperar el ViewModel
     val vm: PerfilViewModel = viewModel(
         viewModelStoreOwner = LocalViewModelStoreOwner.current!!,
@@ -276,20 +281,94 @@ fun ProfileScreen(usuarioId: Long) {
                 }
 
                 item {
-                    SectionTitle("Sobre mí")
-                    Text(
-                        text = datos.datosPersonales ?: "Sin descripción",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                    SobreMiSection(
+                        initialSobreMi = datos.datosPersonales ?: "",
+                        onSobreMiChange = { nueva ->
+                            // aquí podrías llamar a vm.updateDatosPersonales(nueva)
+                        }
                     )
-                    Spacer(modifier = Modifier.height(24.dp))
+                }
+                item {
+                    Spacer(Modifier.height(24.dp))
+                    // Botón Cerrar sesión
+                    Button(
+                        onClick = {
+                            // limpiamos SharedPreferences
+                            context
+                                .getSharedPreferences("UsuarioPrefs", Context.MODE_PRIVATE)
+                                .edit()
+                                .clear()
+                                .apply()
+                            navController.navigate("pantalla_iniciar_sesion")
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF81D4FA),
+                            contentColor   = Color.White
+                        )
+                    ) {
+                        Icon(Icons.Default.ExitToApp, contentDescription = "Cerrar sesión")
+                        Spacer(Modifier.width(8.dp))
+                        Text("Cerrar sesión")
+                    }
+                    Spacer(Modifier.height(24.dp))
                 }
             }
         }
     }
 }
 
+@Composable
+fun SobreMiSection(
+    initialSobreMi: String,
+    onSobreMiChange: (String) -> Unit
+) {
+    SectionTitle("Sobre mí")
 
+    var sobreMi by remember { mutableStateOf(initialSobreMi) }
+    var isEditing by remember { mutableStateOf(initialSobreMi.isBlank()) }
+
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        if (isEditing) {
+            OutlinedTextField(
+                value = sobreMi,
+                onValueChange = {
+                    sobreMi = it
+                    onSobreMiChange(it)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 120.dp),
+                placeholder = { Text("Escribe algo sobre ti") },
+                singleLine = false,
+                maxLines = 5
+            )
+            Spacer(Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                IconButton(onClick = { isEditing = false }) {
+                    Icon(Icons.Default.Check, contentDescription = "Guardar")
+                }
+            }
+        } else {
+            Text(
+                text = if (sobreMi.isBlank()) "Sin descripción" else sobreMi,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+            IconButton(onClick = { isEditing = true }) {
+                Icon(Icons.Default.Edit, contentDescription = "Editar")
+            }
+        }
+    }
+    Spacer(Modifier.height(24.dp))
+}
 @Composable
 private fun SectionTitle(title: String) {
     Text(
@@ -355,6 +434,6 @@ private fun EditableInfoRow(
 @Composable
 fun PreviewProfileScreen(){
     ProyectoBussinesOneTheme {
-        ProfileScreen(usuarioId = 2L)
+        ProfileScreen(usuarioId = 2L, navController = rememberNavController())
     }
 }

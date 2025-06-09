@@ -65,9 +65,10 @@ fun DetalleDiaScreen(
         }
     )
 
+    val userId = MainActivity.UsuarioSesion.getUserId(LocalContext.current)
     //  Carga entradas del mes en el VM
     LaunchedEffect(fecha.withDayOfMonth(1)) {
-        viewModel.loadMonthEntries(YearMonth.from(fecha))
+        viewModel.loadMonthEntries(YearMonth.from(fecha), userId)
     }
     //  Obtener entradas del día
     val allEntries by viewModel.entries.collectAsStateWithLifecycle(initialValue = emptyList())

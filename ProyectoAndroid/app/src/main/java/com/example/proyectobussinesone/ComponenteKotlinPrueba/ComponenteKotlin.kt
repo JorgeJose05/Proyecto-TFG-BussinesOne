@@ -48,6 +48,7 @@ import com.example.proyectobussinesone.ui.theme.ProyectoBussinesOneTheme
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.proyectobussinesone.ComponenteKotlinPrueba.models.Fichaje
 import com.example.proyectobussinesone.ComponenteKotlinPrueba.models.FichajePostRequestDto
+import com.example.proyectobussinesone.MainActivity
 import com.example.proyectobussinesone.RetrofitClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -111,7 +112,7 @@ class TimeTrackerViewModel(private val context: Context) : ViewModel() {
         _entries.value = _entries.value + entry
     }
 
-    fun loadMonthEntries(month: YearMonth) {
+    fun loadMonthEntries(month: YearMonth, userId : Long) {
         viewModelScope.launch {
             Log.d("TimeTrackerVM", "▶ loadMonthEntries: mes = $month")
             _entries.value = emptyList()
@@ -132,10 +133,15 @@ class TimeTrackerViewModel(private val context: Context) : ViewModel() {
                         val fechaLocal = LocalDate.parse(f.fecha)  // p. ej. "2025-06-01" → LocalDate(2025,6,1)
                         (fechaLocal.year == month.year && fechaLocal.month == month.month)
                     }
-                    Log.d("TimeTrackerVM", "   🔎 Fichajes de $month → ${fichajesDelMes.size}")
+
+                    val fichajesUsuario = fichajesDelMes.filter { f ->
+                        f.empleado.id == userId
+                    }
+
+                    Log.d("TimeTrackerVM", "   🔎 Fichajes de $month → ${fichajesUsuario.size}")
 
                     // 5. Convertimos cada FichajeDto a TimeEntry
-                    val listaEntradas = fichajesDelMes.map { f ->
+                    val listaEntradas = fichajesUsuario.map { f ->
                         val fechaLocal = LocalDate.parse(f.fecha)
                         val inTimeLocal = LocalTime.parse(f.horaEntrada)           // e.g. "08:30:00"
                         val outTimeLocal = f.horaSalida?.let { LocalTime.parse(it) } // si no es null, parsea "17:00:00"
@@ -204,7 +210,8 @@ class TimeTrackerViewModel(private val context: Context) : ViewModel() {
 
 
                 val currentMonth = YearMonth.from(fecha)
-                loadMonthEntries(currentMonth)
+
+                loadMonthEntries(currentMonth,empleadoId)
 
 
 
@@ -256,9 +263,11 @@ fun CustomCalendar(
     secondsWorked: Long,
     maxHours: Float
 ) {
+
+    val userId = MainActivity.UsuarioSesion.getUserId(LocalContext.current)
     LaunchedEffect(currentMonth) {
         Log.d("Calendario", "▶ LaunchedEffect disparado: currentMonth = $currentMonth")
-        viewModel.loadMonthEntries(currentMonth)
+        viewModel.loadMonthEntries(currentMonth, userId)
     }
 
     val days = remember(currentMonth, viewModel.entries) { generateMonthDays(currentMonth) }

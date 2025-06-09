@@ -25,10 +25,10 @@ class FichajeRepository {
         try {
             return RetrofitClient.moduloApiService.crearFichaje(request)
         } catch (e: retrofit2.HttpException) {
-            Log.e("FichajeRepo", "❌ Error HTTP: ${e.code()} - ${e.message()}")
+            Log.e("FichajeRepo", "Error HTTP: ${e.code()} - ${e.message()}")
             throw e
         } catch (e: Exception) {
-            Log.e("FichajeRepo", "❌ Error general: ${e.message}")
+            Log.e("FichajeRepo", "Error general: ${e.message}")
             throw e
         }
     }

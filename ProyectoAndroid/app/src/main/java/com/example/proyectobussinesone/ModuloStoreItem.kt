@@ -5,5 +5,6 @@ data class ModuloStoreItem(
     val icon: ImageVector,
     val categoria: String,
     val nombre: String,
-    val descripcion: String
+    val descripcion: String,
+    var disponible: Boolean = true
 )

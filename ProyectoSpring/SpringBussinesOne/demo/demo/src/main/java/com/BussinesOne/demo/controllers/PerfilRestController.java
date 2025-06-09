@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,12 +17,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.BussinesOne.demo.models.Perfil;
 import com.BussinesOne.demo.models.Producto;
+import com.BussinesOne.demo.models.Dtos.Requests.PerfilPatchRequestDto;
 import com.BussinesOne.demo.models.Dtos.Requests.PerfilPostRequestDto;
 import com.BussinesOne.demo.models.Dtos.Requests.ProductoPostRequestDto;
 import com.BussinesOne.demo.repositories.PerfilRepository;
 import com.BussinesOne.demo.servicies.PerfilService;
 import com.BussinesOne.demo.servicies.ProductoService;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 
 @RestController
@@ -71,6 +74,19 @@ public class PerfilRestController {
 
         perfilRepo.delete(perfil);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/PATCH/{id}")
+    public ResponseEntity<Perfil> patchPerfil(
+        @PathVariable Long id,
+        @Valid @RequestBody PerfilPatchRequestDto patchDto
+    ) {
+        try {
+            Perfil actualizado = perfilService.updatePerfil(id, patchDto);
+            return ResponseEntity.ok(actualizado);
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
 }

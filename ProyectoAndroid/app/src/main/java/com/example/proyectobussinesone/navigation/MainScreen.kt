@@ -20,12 +20,16 @@ import androidx.compose.material.Text
 import androidx.compose.material.Icon
 import androidx.compose.material.TabRow
 import androidx.compose.ui.platform.LocalContext
+import com.example.proyectobussinesone.LandingPage
 import com.example.proyectobussinesone.MainActivity
+import com.example.proyectobussinesone.ui.screens.PantallaCorreoDeRecuperacion
+import com.example.proyectobussinesone.ui.screens.PantallaDetalle
+import com.example.proyectobussinesone.ui.screens.PantallaRegistro
 import com.example.proyectobussinesone.ui.theme.ProyectoBussinesOneTheme
 
 
 @Composable
-fun MainScreen(navController : NavHostController) {
+fun MainScreen(navController2 : NavHostController) {
     // 3.1 NavController
     val navController = rememberNavController()
     // 3.2 Para saber qué pestaña va activa
@@ -86,7 +90,27 @@ fun MainScreen(navController : NavHostController) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route)     { ModulosScreen() }
-            composable(Screen.Profile.route)  { ProfileScreen(usuarioId = userId) }
+            composable(Screen.Profile.route) { backStack ->
+                ProfileScreen(
+                    navController = navController,
+                    usuarioId    = userId
+                )
+            }
+            composable("pantalla_iniciar_sesion")  { PantallaIniciarSesion(navController2) }
+            composable("landing_page") {
+                LandingPage(
+                    navController
+                )
+            }
+            composable("pantalla_detalle") {
+                PantallaDetalle(navController)
+            }
+            composable("pantalla_registro") {
+                PantallaRegistro(navController)
+            }
+            composable("pantalla_recuperacion_de_correo") {
+                PantallaCorreoDeRecuperacion(navController)
+            }
         }
     }
 }
@@ -96,6 +120,6 @@ fun MainScreen(navController : NavHostController) {
 @Composable
 fun PreviewMainScreen() {
     ProyectoBussinesOneTheme {
-        MainScreen(navController = rememberNavController())
+        MainScreen(navController2 = rememberNavController())
     }
 }

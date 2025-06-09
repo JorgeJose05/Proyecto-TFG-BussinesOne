@@ -1,5 +1,6 @@
 package com.example.proyectobussinesone.navigation
 
+import android.net.Uri
 import com.example.proyectobussinesone.ModuloStoreItem
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -54,6 +55,7 @@ fun ModulosScreen() {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope       = rememberCoroutineScope()
     val navController = rememberNavController()
+    val sharedVm: ModuloViewModel = viewModel()
 
     ModalNavigationDrawer(
         drawerState   = drawerState,
@@ -117,7 +119,21 @@ fun ModulosScreen() {
                 modifier = Modifier.padding(innerPadding)
             ) {
                 composable("tienda") {
-                    TiendaScreen()
+                    TiendaScreen(
+                        onModuleClick = { modulo ->
+                            sharedVm.select(modulo)
+                            navController.navigate("detalle_modulo")
+                        }
+                    )
+                }
+                composable("detalle_modulo") {
+                    val seleccionado = sharedVm.seleccionado.collectAsState().value
+                    if (seleccionado != null) {
+                        ModuloDetailScreen(
+                            modulo = seleccionado,
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
                 }
                 composable("modulo1") {
                     Modulo1Screen()
@@ -141,6 +157,7 @@ fun ModulosScreen() {
                         onBack = { navController.popBackStack() }
                     )
                 }
+
             }
         }
     }
@@ -149,7 +166,7 @@ fun ModulosScreen() {
 // Definimos las pantallas
 
 @Composable
-fun TiendaScreen(  vm: ModuloViewModel = viewModel() ) {
+fun TiendaScreen( vm: ModuloViewModel = viewModel(), onModuleClick: (ModuloStoreItem) -> Unit ) {
 
     // 4.1 Recogemos el estado
     val uiState = vm.uiState.collectAsState()
@@ -169,7 +186,8 @@ fun TiendaScreen(  vm: ModuloViewModel = viewModel() ) {
                         icon = iconoDesdeNombre(dto.icono),
                         categoria = dto.grupo,
                         nombre = dto.nombre,
-                        descripcion = "Aquí va la descripción real"
+                        descripcion = "Aquí va la descripción real",
+                        disponible = dto.disponible
                     )
                 }
                     // Después filtramos por query:
@@ -214,7 +232,7 @@ fun TiendaScreen(  vm: ModuloViewModel = viewModel() ) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { /* Acción al hacer clic en el producto */ },
+                        .clickable {  onModuleClick(modulo) },
                     elevation = CardDefaults.cardElevation(4.dp)
                 ) {
                     Row(
