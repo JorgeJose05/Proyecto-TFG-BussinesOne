@@ -12,6 +12,7 @@ public class ModuloRequestMapper {
         modulo.setNombre(dto.getNombre());
         modulo.setGrupo(dto.getGrupo());
         modulo.setIcono(dto.getIcono());
+        
         return modulo;
     }
 }

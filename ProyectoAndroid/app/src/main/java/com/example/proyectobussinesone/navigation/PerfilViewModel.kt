@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.proyectobussinesone.navigation.PerfilRepository
+import com.example.proyectobussinesone.navigation.models.PerfilDto
+import com.example.proyectobussinesone.navigation.models.toPerfil
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -100,6 +102,22 @@ class PerfilViewModel(
             }
         }
     }
+
+    fun patchPerfil(patchDto: PerfilDto) {
+        val id = usuarioId ?: run {
+            _errorMessage.value = "ID de usuario no definido"
+            return
+        }
+        viewModelScope.launch {
+            val result = repository.patchPerfil(usuarioId, patchDto)
+            result.onSuccess { perfilActualizado ->
+                _perfilState.value = perfilActualizado.toPerfil()
+            }.onFailure {
+                _errorMessage.value = it.message
+            }
+        }
+    }
+
 
     /**
      * Factory para instanciar este ViewModel sin Hilt.

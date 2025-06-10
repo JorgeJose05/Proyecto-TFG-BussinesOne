@@ -81,17 +81,29 @@ fun ModuloDetailScreen(
 
             Button(
                 onClick = {
-                    installed = !installed
-                    // Actualiza SOLO en memoria:
-                    modulo.disponible = !installed
+                    if (modulo.disponible) {
+                        installed = !installed
+                    }
                 },
+                enabled = modulo.disponible,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (installed) Color.Red else Color(0xFF4FC3F7),
-                    contentColor   = Color.White
+                    containerColor = when {
+                        !modulo.disponible -> Color.Gray
+                        installed -> Color.Red
+                        else -> Color(0xFF4FC3F7)
+                    },
+                    contentColor = Color.White
                 )
             ) {
-                Text(if (installed) "Desinstalar" else "Instalar")
+                Text(
+                    text = when {
+                        !modulo.disponible -> "No disponible"
+                        installed -> "Desinstalar"
+                        else -> "Instalar"
+                    }
+                )
             }
+
         }
     }
 }

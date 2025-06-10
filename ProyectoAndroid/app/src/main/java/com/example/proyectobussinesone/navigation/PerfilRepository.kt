@@ -3,6 +3,7 @@ package com.example.proyectobussinesone.navigation
 import android.content.ContentValues.TAG
 import android.util.Log
 import com.example.proyectobussinesone.ApiService
+import com.example.proyectobussinesone.RetrofitClient
 import com.example.proyectobussinesone.navigation.models.PerfilDto
 import com.example.proyectobussinesone.ui.screens.PerfilRequest
 import com.example.proyectobussinesone.ui.viewmodel.Perfil
@@ -69,5 +70,20 @@ class PerfilRepository @Inject constructor(
             iban = dto.iban
         )
     }
+
+    fun patchPerfil(id: Long, patchDto: PerfilDto): Result<PerfilDto> {
+        return try {
+            val response = RetrofitClient.moduloApiService.patchPerfil(id, patchDto)
+            if (response.isSuccessful) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("Error al actualizar perfil"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+
 
 }

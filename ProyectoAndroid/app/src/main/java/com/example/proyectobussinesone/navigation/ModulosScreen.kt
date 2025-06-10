@@ -165,6 +165,7 @@ fun ModulosScreen() {
 
 // Definimos las pantallas
 
+
 @Composable
 fun TiendaScreen( vm: ModuloViewModel = viewModel(), onModuleClick: (ModuloStoreItem) -> Unit ) {
 
@@ -186,8 +187,8 @@ fun TiendaScreen( vm: ModuloViewModel = viewModel(), onModuleClick: (ModuloStore
                         icon = iconoDesdeNombre(dto.icono),
                         categoria = dto.grupo,
                         nombre = dto.nombre,
-                        descripcion = "Aquí va la descripción real",
-                        disponible = dto.disponible
+                        descripcion = DescripcionDesdeNombre(dto.icono),
+                        disponible = Disponible(dto.nombre)
                     )
                 }
                     // Después filtramos por query:
@@ -265,6 +266,14 @@ fun TiendaScreen( vm: ModuloViewModel = viewModel(), onModuleClick: (ModuloStore
     }
 }
 
+fun Disponible(moduloNombre : String): Boolean {
+
+    if (moduloNombre == "Fichaje" || moduloNombre == "Punto de venta") {
+        return true
+    } else {
+        return false
+    }
+}
 fun iconoDesdeNombre(nombreIcono: String): ImageVector {
     return when (nombreIcono) {
         "Inventario"      -> Icons.Default.Inventory
@@ -283,6 +292,26 @@ fun iconoDesdeNombre(nombreIcono: String): ImageVector {
         "Reportes" -> Icons.Default.Description
 
         else             -> Icons.Default.HelpOutline
+    }
+}
+fun DescripcionDesdeNombre(nombreIcono: String): String {
+    return when (nombreIcono) {
+        "Inventario"      -> "Gestión y control de productos almacenados"
+        "Clientes"        -> "Administración de información y datos de clientes"
+        "Facturación"     -> "Generación y seguimiento de facturas"
+        "Ventas"          -> "Monitoreo y análisis de ventas realizadas"
+        "Proyectos"       -> "Organización y seguimiento de proyectos"
+        "Contabilidad"    -> "Registro y control de movimientos contables"
+        "Soporte"         -> "Atención y ayuda técnica a usuarios"
+        "Recursos Humanos"-> "Gestión del personal y administración laboral"
+        "Marketing"       -> "Planificación y ejecución de campañas publicitarias"
+        "eCommerce"       -> "Administración de tienda y ventas en línea"
+        "Administración"  -> "Control general de operaciones administrativas"
+        "Catálogo"        -> "Listado y gestión de productos o servicios"
+        "Informes"        -> "Creación y análisis de reportes estadísticos"
+        "Reportes"        -> "Documentación detallada de actividades y resultados"
+
+        else             -> "Este modulo aun no tiene descripcion"
     }
 }
 

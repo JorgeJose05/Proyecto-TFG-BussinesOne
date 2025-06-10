@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,8 +52,50 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.proyectobussinesone.RetrofitClient
+import com.example.proyectobussinesone.navigation.models.PerfilDto
 import com.example.proyectobussinesone.ui.viewmodel.PerfilViewModel
 
+/*
+@Composable
+fun PersonalDataSection() {
+    SectionTitle("Datos Personales")
+
+
+    var dni by remember { mutableStateOf<String?>(null) }
+    var nacimiento by remember { mutableStateOf<String?>(null) }
+    var ss by remember { mutableStateOf<String?>(null) }
+    var iban by remember { mutableStateOf<String?>(null) }
+
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        EditableInfoRow(
+            icon = Icons.Default.Badge,
+            label = "DNI",
+            value = dni.,
+            onValueSaved = { dni = it }
+        )
+        EditableInfoRow(
+            icon = Icons.Default.Cake,
+            label = "Fecha de Nacimiento",
+            value = nacimiento,
+            onValueSaved = { nacimiento = it }
+        )
+        EditableInfoRow(
+            icon = Icons.Default.Security,
+            label = "Nº Seguridad Social",
+            value = ss,
+            onValueSaved = { ss = it }
+        )
+        EditableInfoRow(
+            icon = Icons.Default.AccountBalance,
+            label = "IBAN",
+            value = iban,
+            onValueSaved = { iban = it }
+        )
+    }
+
+    Spacer(modifier = Modifier.height(24.dp))
+}
+*/
 @Composable
 fun AcademicSection(
     initialFormacion: String,
@@ -150,47 +193,6 @@ fun EditableAcademicItem(
     }
 }
 
-
-@Composable
-fun PersonalDataSection() {
-    SectionTitle("Datos Personales")
-
-
-    var dni by remember { mutableStateOf<String?>(null) }
-    var nacimiento by remember { mutableStateOf<String?>(null) }
-    var ss by remember { mutableStateOf<String?>(null) }
-    var iban by remember { mutableStateOf<String?>(null) }
-
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        EditableInfoRow(
-            icon = Icons.Default.Badge,
-            label = "DNI",
-            value = dni,
-            onValueChange = { dni = it }
-        )
-        EditableInfoRow(
-            icon = Icons.Default.Cake,
-            label = "Fecha de Nacimiento",
-            value = nacimiento,
-            onValueChange = { nacimiento = it }
-        )
-        EditableInfoRow(
-            icon = Icons.Default.Security,
-            label = "Nº Seguridad Social",
-            value = ss,
-            onValueChange = { ss = it }
-        )
-        EditableInfoRow(
-            icon = Icons.Default.AccountBalance,
-            label = "IBAN",
-            value = iban,
-            onValueChange = { iban = it }
-        )
-    }
-
-    Spacer(modifier = Modifier.height(24.dp))
-}
-
 @Composable
 fun ProfileScreen(usuarioId: Long, navController: NavHostController) {
     // Necesitamos un ViewModelProvider.Factory
@@ -208,6 +210,46 @@ fun ProfileScreen(usuarioId: Long, navController: NavHostController) {
     val perfil by vm.perfilState.collectAsState()
     val errorMsg by vm.errorMessage.collectAsState()
 
+    // Campos editables en la UI
+    var telefono            by remember { mutableStateOf("") }
+    var direccion           by remember { mutableStateOf("") }
+    var dni                 by remember { mutableStateOf("") }
+    var nacimiento          by remember { mutableStateOf("") }
+    var numeroSeguridad     by remember { mutableStateOf("") }
+    var iban                by remember { mutableStateOf("") }
+    var formacionAcademica  by remember { mutableStateOf("") }
+    var datosPersonales     by remember { mutableStateOf("") }
+
+    LaunchedEffect(perfil) {
+        perfil?.let {
+            telefono           = it.telefono   ?: ""
+            direccion          = it.direccion  ?: ""
+            dni                = it.dni        ?: ""
+            nacimiento         = it.fechaNacimiento ?: ""
+            numeroSeguridad    = it.numeroSeguridadSocial ?: ""
+            iban               = it.iban       ?: ""
+            formacionAcademica = it.formacionAcademica  ?: ""
+            datosPersonales    = it.datosPersonales     ?: ""
+        }
+    }
+
+    fun actualizarPerfil() {
+        val dto = PerfilDto(
+            id                     = usuarioId,
+            nombre                 = perfil?.nombre ?: "",
+            email                  = perfil?.email  ?: "",
+            contraseña             = perfil?.contraseña,
+            telefono               = telefono,
+            direccion              = direccion,
+            dni                    = dni,
+            fechaNacimiento        = nacimiento,
+            numeroSeguridadSocial  = numeroSeguridad,
+            iban                   = iban,
+            formacionAcademica     = formacionAcademica,
+            datosPersonales        = datosPersonales
+        )
+        vm.patchPerfil(dto)
+    }
 
     // Mostramos mientras carga o error
     when {
@@ -256,35 +298,206 @@ fun ProfileScreen(usuarioId: Long, navController: NavHostController) {
 
                 item {
                     SectionTitle("Contacto")
-                    EditableInfoRow(Icons.Default.Phone, "Teléfono", datos.telefono ?: "") { /*no-edit*/ }
+                    EditableInfoRow(
+                        icon         = Icons.Default.Phone,
+                        label        = "Teléfono",
+                        value        = telefono,
+                        onValueSaved = {
+                            telefono = it
+                            vm.patchPerfil(
+                                PerfilDto(
+                                    id = usuarioId,
+                                    nombre = perfil!!.nombre,
+                                    email = perfil!!.email,
+                                    contraseña = perfil!!.contraseña,
+                                    telefono = telefono,
+                                    direccion = direccion,
+                                    dni = dni,
+                                    fechaNacimiento = nacimiento,
+                                    numeroSeguridadSocial = numeroSeguridad,
+                                    iban = iban,
+                                    formacionAcademica = formacionAcademica,
+                                    datosPersonales = datosPersonales
+                                )
+                            )
+                        }
+                    )
                     EditableInfoRow(Icons.Default.Email, "Email", datos.email) { /*no-edit*/ }
-                    EditableInfoRow(Icons.Default.Home, "Dirección", datos.direccion ?: "") { /*no-edit*/ }
+                    EditableInfoRow(
+                        icon         = Icons.Default.Home,
+                        label        = "Dirección",
+                        value        = direccion,
+                        onValueSaved = {
+                            direccion = it
+                            vm.patchPerfil(
+                                PerfilDto(
+                                    id = usuarioId,
+                                    nombre = perfil!!.nombre,
+                                    email = perfil!!.email,
+                                    contraseña = perfil!!.contraseña,
+                                    telefono = telefono,
+                                    direccion = direccion,
+                                    dni = dni,
+                                    fechaNacimiento = nacimiento,
+                                    numeroSeguridadSocial = numeroSeguridad,
+                                    iban = iban,
+                                    formacionAcademica = formacionAcademica,
+                                    datosPersonales = datosPersonales
+                                )
+                            )
+                        }
+                    )
+
                     Spacer(modifier = Modifier.height(24.dp))
                 }
 
                 item {
                     SectionTitle("Datos Personales")
-                    EditableInfoRow(Icons.Default.Badge, "DNI", datos.dni ?: "") { /*no-edit*/ }
-                    EditableInfoRow(Icons.Default.Cake, "Fecha de Nacimiento", datos.fechaNacimiento ?: "") { /*no-edit*/ }
-                    EditableInfoRow(Icons.Default.Security, "Nº Seguridad Social", datos.numeroSeguridadSocial ?: "") { /*no-edit*/ }
-                    EditableInfoRow(Icons.Default.AccountBalance, "IBAN", datos.iban ?: "") { /*no-edit*/ }
+                    EditableInfoRow(
+                        icon         = Icons.Default.Badge,
+                        label        = "DNI",
+                        value        = dni,
+                        onValueSaved = {
+                            dni = it
+                            vm.patchPerfil(
+                                PerfilDto(
+                                    id = usuarioId,
+                                    nombre = perfil!!.nombre,
+                                    email = perfil!!.email,
+                                    contraseña = perfil!!.contraseña,
+                                    telefono = telefono,
+                                    direccion = direccion,
+                                    dni = dni,
+                                    fechaNacimiento = nacimiento,
+                                    numeroSeguridadSocial = numeroSeguridad,
+                                    iban = iban,
+                                    formacionAcademica = formacionAcademica,
+                                    datosPersonales = datosPersonales
+                                )
+                            )
+                        }
+                    )
+                    EditableInfoRow(
+                        icon         = Icons.Default.Cake,
+                        label        = "Fecha de Nacimiento",
+                        value        = nacimiento,
+                        onValueSaved = {
+                            nacimiento = it
+                            vm.patchPerfil(
+                                PerfilDto(
+                                    id = usuarioId,
+                                    nombre = perfil!!.nombre,
+                                    email = perfil!!.email,
+                                    contraseña = perfil!!.contraseña,
+                                    telefono = telefono,
+                                    direccion = direccion,
+                                    dni = dni,
+                                    fechaNacimiento = nacimiento,
+                                    numeroSeguridadSocial = numeroSeguridad,
+                                    iban = iban,
+                                    formacionAcademica = formacionAcademica,
+                                    datosPersonales = datosPersonales
+                                )
+                            )
+                        }
+                    )
+                    EditableInfoRow(
+                        icon         = Icons.Default.Security,
+                        label        = "Nº Seguridad Social",
+                        value        = numeroSeguridad,
+                        onValueSaved = {
+                            numeroSeguridad = it
+                            vm.patchPerfil(
+                                PerfilDto(
+                                    id = usuarioId,
+                                    nombre = perfil!!.nombre,
+                                    email = perfil!!.email,
+                                    contraseña = perfil!!.contraseña,
+                                    telefono = telefono,
+                                    direccion = direccion,
+                                    dni = dni,
+                                    fechaNacimiento = nacimiento,
+                                    numeroSeguridadSocial = numeroSeguridad,
+                                    iban = iban,
+                                    formacionAcademica = formacionAcademica,
+                                    datosPersonales = datosPersonales
+                                )
+                            )
+                        }
+                    )
+                    EditableInfoRow(
+                        icon         = Icons.Default.AccountBalance,
+                        label        = "IBAN",
+                        value        = iban,
+                        onValueSaved = {
+                            iban = it
+                            vm.patchPerfil(
+                                PerfilDto(
+                                    id = usuarioId,
+                                    nombre = perfil!!.nombre,
+                                    email = perfil!!.email,
+                                    contraseña = perfil!!.contraseña,
+                                    telefono = telefono,
+                                    direccion = direccion,
+                                    dni = dni,
+                                    fechaNacimiento = nacimiento,
+                                    numeroSeguridadSocial = numeroSeguridad,
+                                    iban = iban,
+                                    formacionAcademica = formacionAcademica,
+                                    datosPersonales = datosPersonales
+                                )
+                            )
+                        }
+                    )
                     Spacer(modifier = Modifier.height(24.dp))
                 }
 
                 item {
                     AcademicSection(
-                        initialFormacion = datos.formacionAcademica ?: "",
-                        onFormacionChange = { nueva ->
-
+                        initialFormacion = formacionAcademica,
+                        onFormacionChange = {
+                            formacionAcademica = it
+                            vm.patchPerfil(
+                                PerfilDto(
+                                    id = usuarioId,
+                                    nombre = perfil!!.nombre,
+                                    email = perfil!!.email,
+                                    contraseña = perfil!!.contraseña,
+                                    telefono = telefono,
+                                    direccion = direccion,
+                                    dni = dni,
+                                    fechaNacimiento = nacimiento,
+                                    numeroSeguridadSocial = numeroSeguridad,
+                                    iban = iban,
+                                    formacionAcademica = formacionAcademica,
+                                    datosPersonales = datosPersonales
+                                )
+                            )
                         }
                     )
                 }
 
                 item {
                     SobreMiSection(
-                        initialSobreMi = datos.datosPersonales ?: "",
-                        onSobreMiChange = { nueva ->
-                            // aquí podrías llamar a vm.updateDatosPersonales(nueva)
+                        initialSobreMi = datosPersonales,
+                        onSobreMiChange = {
+                            datosPersonales = it
+                            vm.patchPerfil(
+                                PerfilDto(
+                                    id = usuarioId,
+                                    nombre = perfil!!.nombre,
+                                    email = perfil!!.email,
+                                    contraseña = perfil!!.contraseña,
+                                    telefono = telefono,
+                                    direccion = direccion,
+                                    dni = dni,
+                                    fechaNacimiento = nacimiento,
+                                    numeroSeguridadSocial = numeroSeguridad,
+                                    iban = iban,
+                                    formacionAcademica = formacionAcademica,
+                                    datosPersonales = datosPersonales
+                                )
+                            )
                         }
                     )
                 }
@@ -385,11 +598,18 @@ private fun SectionTitle(title: String) {
 private fun EditableInfoRow(
     icon: ImageVector,
     label: String,
-    value: String?,
-    onValueChange: (String) -> Unit
+    value: String,                        // ahora no nulo: simplifica la lógica
+    onValueSaved: (String) -> Unit        // renombrado para mayor claridad
 ) {
+    // 1. Estado de edición local
     var isEditing by remember { mutableStateOf(false) }
-    var text by remember { mutableStateOf(value ?: "") }
+    var text      by remember { mutableStateOf(value) }
+
+    // 2. Cuando el valor externo cambie, actualizamos el text local
+    LaunchedEffect(value) {
+        text = value
+        isEditing = false
+    }
 
     Row(
         modifier = Modifier
@@ -398,27 +618,30 @@ private fun EditableInfoRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp))
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(Modifier.width(12.dp))
         Text("$label:", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(Modifier.width(8.dp))
 
         if (isEditing) {
+            // 3. Campo de texto en edición
             OutlinedTextField(
                 value = text,
                 onValueChange = { text = it },
                 modifier = Modifier.weight(1f),
                 singleLine = true
             )
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(Modifier.width(4.dp))
             IconButton(onClick = {
+                // 4. Al confirmar, guardamos y salimos de modo edición
+                onValueSaved(text.trim())
                 isEditing = false
-                onValueChange(text) // Guardar valor
             }) {
                 Icon(Icons.Default.Check, contentDescription = "Guardar")
             }
         } else {
+            // 5. Modo lectura
             Text(
-                text = if (text.isBlank()) "Sin información" else text,
+                text = if (value.isBlank()) "Sin información" else value,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.weight(1f),
                 overflow = TextOverflow.Ellipsis
@@ -429,6 +652,7 @@ private fun EditableInfoRow(
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

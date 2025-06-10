@@ -11,6 +11,7 @@ import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 
@@ -40,6 +41,8 @@ interface ApiService {
     @POST("Fichaje/POST")
     suspend fun crearFichaje(@Body dto: FichajePostRequestDto): Fichaje
 
+    @PATCH("Perfil/PATCH/{id}")
+    fun patchPerfil(@Path("id") id: Long,@Body patchDto: PerfilDto): Response<PerfilDto>
 
     @GET("Perfil/GET/{id}")
     suspend fun getPerfil(@Path("id") id: Long): PerfilDto

@@ -1,5 +1,6 @@
 package com.example.proyectobussinesone.navigation.models
 
+import com.example.proyectobussinesone.ui.viewmodel.Perfil
 import com.google.gson.annotations.SerializedName
 
 data class PerfilDto(
@@ -16,3 +17,20 @@ data class PerfilDto(
     @SerializedName("formacionAcademica") val formacionAcademica: String?, // si lo devuelves como lista
     @SerializedName("datosPersonales") val datosPersonales: String?
 )
+
+fun PerfilDto.toPerfil(): Perfil {
+    return Perfil(
+        id = this.id,
+        nombre = this.nombre,
+        email = this.email,
+        contraseña = this.contraseña,
+        telefono = this.telefono,
+        direccion = this.direccion,
+        formacionAcademica = this.formacionAcademica,
+        datosPersonales = this.datosPersonales,
+        dni = this.dni,
+        fechaNacimiento = this.fechaNacimiento,
+        numeroSeguridadSocial = this.numeroSeguridadSocial,
+        iban = this.iban
+    )
+}
