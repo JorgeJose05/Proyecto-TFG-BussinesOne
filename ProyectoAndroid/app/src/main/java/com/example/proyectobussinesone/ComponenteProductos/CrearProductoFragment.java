@@ -91,39 +91,35 @@ public class CrearProductoFragment extends Fragment {
     private void startCamera() {
         if (cameraStarted) return;
         cameraStarted = true;
-
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture =
                 ProcessCameraProvider.getInstance(requireContext());
-
         cameraProviderFuture.addListener(() -> {
             try {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
-
-                // 🔁 Desvincula cualquier caso de uso existente
+                //Desvincula cualquier caso de uso existente
                 cameraProvider.unbindAll();
 
-                // ✅ Construye el preview
+                // Construye el preview
                 Preview preview = new Preview.Builder()
                         .setTargetResolution(new android.util.Size(640, 480))
                         .build();
                 preview.setSurfaceProvider(binding.previewView.getSurfaceProvider());
 
-                // ✅ Configura imageCapture con una resolución reducida
+                //Configura imageCapture con una resolución reducida
                 imageCapture = new ImageCapture.Builder()
                         .setTargetResolution(new android.util.Size(640, 480))
                         .build();
 
-                // 📷 Selecciona cámara trasera
+                //Selecciona cámara trasera
                 CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
 
-                // ✅ Vincula sólo 2 casos de uso: Preview e ImageCapture
+                //Vincula sólo 2 casos de uso: Preview e ImageCapture
                 cameraProvider.bindToLifecycle(
                         getViewLifecycleOwner(),
                         cameraSelector,
                         preview,
                         imageCapture
                 );
-
             } catch (ExecutionException | InterruptedException e) {
                 Log.e("CameraX", "Error al inicializar la cámara", e);
             } catch (IllegalArgumentException e) {
@@ -168,7 +164,6 @@ public class CrearProductoFragment extends Fragment {
 
     private void takePhoto() {
         if (imageCapture == null) return;
-        // Create file in cache
         String timestamp = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US)
                 .format(System.currentTimeMillis());
         photoFile = new File(requireContext().getCacheDir(), "IMG_" + timestamp + ".jpg");
@@ -187,7 +182,6 @@ public class CrearProductoFragment extends Fragment {
                             // Generar código de barras numérico aleatorio de 9 dígitos
                             int randomCode = (int) (Math.random() * 900000000) + 100000000; // asegura 9 dígitos
                             barcode = String.valueOf(randomCode);
-
 
                             Bitmap barcodeBmp = generateBarcode(barcode);
 
